@@ -19,7 +19,7 @@ public class BoardManager : MonoBehaviour
     public AudioClip notify, capture, regularMove;
 
     // Game variables
-    public bool playerWhite, whiteToMove, currentPlayerInCheck, checkmate;
+    public bool playerWhite, AIenabled, whiteToMove, currentPlayerInCheck, checkmate;
     public int[] square;
     public int[] kingSquares;
     public List<int> pieceList, attackedSquares, pinnedPieces, pinnedDirection;
@@ -211,6 +211,7 @@ public class BoardManager : MonoBehaviour
         squaresAroundWhiteKing = new bool[8];
 
         playerWhite = true;
+        AIenabled = true;
         currentPlayerInCheck = false;
         whiteToMove = true;
         checkmate = false;
@@ -622,5 +623,41 @@ public class BoardManager : MonoBehaviour
         Debug.Log("Checkmate? " + checkmate);
 
         soundPlayer.PlayOneShot(clipToPlay);
+
+        TurnHandler();
+    }
+
+    public void TurnHandler()
+    {
+        if (!AIenabled)
+            return;
+
+        if (checkmate)
+        {
+            Debug.Log("You won, checkmate!");
+            return;
+        }
+
+        Debug.Log("Trying to make move through AI");
+        
+        if (playerWhite && !whiteToMove)
+        {
+            AIManager.Instance.MakeMove();
+        }
+        else if (!playerWhite && whiteToMove)
+        {
+            AIManager.Instance.MakeMove();
+        }
+        else
+        {
+            return;
+        }
+
+        int piece = AIManager.Instance.piece;
+        int startFile = AIManager.Instance.startFile;
+        int startRank = AIManager.Instance.startRank;
+        Vector3 newPos = AIManager.Instance.newPosition;
+
+        MakeMove(piece, startFile, startRank, newPos);
     }
 }
