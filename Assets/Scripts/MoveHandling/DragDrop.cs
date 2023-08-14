@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -83,7 +84,13 @@ public class DragDrop : MonoBehaviour
             placedPos = placedPos - gameCanvas.transform.position;
             placedPos = placedPos/gameCanvas.scaleFactor;
 
-            BoardManager.Instance.MakeMove(piece, file, rank, placedPos);
+            int newFile = Mathf.RoundToInt(placedPos.x);
+            int newRank = Mathf.RoundToInt(placedPos.y);
+
+            int oldPos = rank * 8 + file;
+            int newPos = newRank * 8 + newFile;
+
+            BoardManager.Instance.MakeMove(oldPos, newPos);
         }
     }
 }

@@ -8,7 +8,7 @@ public class AIManager : MonoBehaviour
 {
     public static AIManager Instance;
     public int piece, startFile, startRank;
-    public Vector3 newPosition;
+    public int newPosition;
 
     private bool _playerWhite;
     private float _evaluation;
@@ -73,7 +73,7 @@ public class AIManager : MonoBehaviour
         int file = BoardManager.Instance.allowedMoves[randomPiece][randomMove] % 8;
         int rank = BoardManager.Instance.allowedMoves[randomPiece][randomMove] / 8;
 
-        newPosition = new Vector3(file, rank, -2);  
+        newPosition = rank * 8 + file; 
     }
     private void Evaluation()
     {

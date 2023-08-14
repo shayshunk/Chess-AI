@@ -467,16 +467,20 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void MakeMove(int piece, int startFile, int startRank, Vector3 newPosition)
+    public void MakeMove(int pieceIndex, int newIndex)
     {
         Debug.Log("Make move called.");
 
         AudioClip clipToPlay = regularMove;
         
-        int file = Mathf.RoundToInt(newPosition.x);
-        int rank = Mathf.RoundToInt(newPosition.y);
+        int file = newIndex % 8;
+        int rank = newIndex / 8;
 
-        int pieceIndex = startRank * 8 + startFile;
+        int startFile = pieceIndex % 8;
+        int startRank = pieceIndex / 8;
+
+        int piece = square[pieceIndex];
+
         int pieceListIndex = pieceList.IndexOf(pieceIndex);
 
         if (allowedMoves[pieceListIndex].Count == 0)
@@ -722,9 +726,10 @@ public class BoardManager : MonoBehaviour
         int piece = AIManager.Instance.piece;
         int startFile = AIManager.Instance.startFile;
         int startRank = AIManager.Instance.startRank;
-        Vector3 newPos = AIManager.Instance.newPosition;
+        int oldPos = startRank * 8 + startFile;
+        int newPos = AIManager.Instance.newPosition;
 
-        MakeMove(piece, startFile, startRank, newPos);
+        MakeMove(oldPos, newPos);
     }
 
     public void UnmakeMove()
