@@ -166,8 +166,8 @@ public class BoardManager : MonoBehaviour
         epFileHistory.Push(epFile);
 
         int[] highlightArr = new int[2];
-        highlightArr[0] = 10;
-        highlightArr[1] = 10;
+        highlightArr[0] = 100;
+        highlightArr[1] = 100;
         highlightHistory.Push(highlightArr.Clone() as int[]);
     }
 
