@@ -5,11 +5,17 @@ using UnityEngine;
 public static class GeneratePseudoLegal
 {
     private static List<int> _allowedSquares, _attackedSquares;
-    public static List<int> GeneratePawnPseudoLegal(int pieceIndex, int pieceColor)
+
+    public static void ResetLists()
     {
         _allowedSquares = new List<int>();
         _attackedSquares = new List<int>();
+    }
 
+    public static List<int> GeneratePawnPseudoLegal(int pieceIndex, int pieceColor)
+    {
+        ResetLists();
+        
         int rank = pieceIndex / 8;
         int file = pieceIndex % 8;
 
@@ -17,6 +23,87 @@ public static class GeneratePseudoLegal
         {
             int squareUp = pieceIndex + 8;
             bool moveOne = MoveGenerator.IsSquareFree(squareUp);
+
+            if (file == BoardManager.Instance.epFile - 1)
+            {
+                Debug.Log("Checking for EP at file: " + file);
+                if (rank == 4)
+                {
+                    Debug.Log("Correct rank for EP.");
+
+                    foreach (int square in _allowedSquares)
+                    {
+                        Debug.Log("Pawn can move to: " + square);
+                    }
+                    
+                    int squareRight = pieceIndex + 1;
+                    int pieceRight = BoardManager.Instance.square[squareRight];
+                    int pieceRightType = Piece.PieceType(pieceRight);
+                    int pieceRightColor = Piece.Color(pieceRight);
+
+                    int[] tempSquares = new int[64];
+                    bool tempCheck = BoardManager.Instance.currentPlayerInCheck;
+                    int piece = BoardManager.Instance.square[pieceIndex];
+
+                    BoardManager.Instance.square.CopyTo(tempSquares, 0);
+
+                    BoardManager.Instance.square[pieceIndex + 9] = piece;
+                    BoardManager.Instance.square[pieceIndex] = 0;
+                    BoardManager.Instance.square[squareRight] = 0;
+
+                    BoardManager.Instance.GenerateAllAttackedSquares();
+                    BoardManager.Instance.IsInCheck();
+
+                    ResetLists();
+
+                    if (!BoardManager.Instance.currentPlayerInCheck)
+                    {
+                        if (pieceRightType == Piece.Pawn && pieceRightColor == Piece.Black)
+                        {
+                            _allowedSquares.Add(pieceIndex + 9);
+                        }
+                    }
+
+                    BoardManager.Instance.currentPlayerInCheck = tempCheck;
+                    tempSquares.CopyTo(BoardManager.Instance.square, 0);
+                }
+            }
+            else if (file == BoardManager.Instance.epFile + 1)
+            {
+                if (rank == 4)
+                {
+                    int squareLeft = pieceIndex - 1;
+                    int pieceLeft = BoardManager.Instance.square[squareLeft];
+                    int pieceLeftType = Piece.PieceType(pieceLeft);
+                    int pieceLeftColor = Piece.Color(pieceLeft);
+
+                    int[] tempSquares = new int[64];
+                    bool tempCheck = BoardManager.Instance.currentPlayerInCheck;
+                    int piece = BoardManager.Instance.square[pieceIndex];
+
+                    BoardManager.Instance.square.CopyTo(tempSquares, 0);
+
+                    BoardManager.Instance.square[pieceIndex + 7] = piece;
+                    BoardManager.Instance.square[pieceIndex] = 0;
+                    BoardManager.Instance.square[squareLeft] = 0;
+
+                    BoardManager.Instance.GenerateAllAttackedSquares();
+                    BoardManager.Instance.IsInCheck();
+
+                    ResetLists();
+
+                    if (!BoardManager.Instance.currentPlayerInCheck)
+                    {
+                        if (pieceLeftType == Piece.Pawn && pieceLeftColor == Piece.Black)
+                        {
+                            _allowedSquares.Add(pieceIndex + 7);
+                        }
+                    }
+
+                    BoardManager.Instance.currentPlayerInCheck = tempCheck;
+                    tempSquares.CopyTo(BoardManager.Instance.square, 0);
+                }
+            }
             if (moveOne)
             {
                 _allowedSquares.Add(squareUp);
@@ -49,44 +136,86 @@ public static class GeneratePseudoLegal
                     _allowedSquares.Add(squareUpRight);
                 }
             }
+        } else
+        {
             if (file == BoardManager.Instance.epFile - 1)
             {
-                if (rank == 4)
+                if (rank == 3)
                 {
                     int squareRight = pieceIndex + 1;
                     int pieceRight = BoardManager.Instance.square[squareRight];
                     int pieceRightType = Piece.PieceType(pieceRight);
                     int pieceRightColor = Piece.Color(pieceRight);
 
-                    if (pieceRightType == Piece.Pawn && pieceRightColor == Piece.Black)
+                    int[] tempSquares = new int[64];
+                    bool tempCheck = BoardManager.Instance.currentPlayerInCheck;
+                    int piece = BoardManager.Instance.square[pieceIndex];
+
+                    BoardManager.Instance.square.CopyTo(tempSquares, 0);
+
+                    BoardManager.Instance.square[pieceIndex - 7] = piece;
+                    BoardManager.Instance.square[pieceIndex] = 0;
+                    BoardManager.Instance.square[squareRight] = 0;
+
+                    BoardManager.Instance.GenerateAllAttackedSquares();
+                    BoardManager.Instance.IsInCheck();
+
+                    ResetLists();
+
+                    if (!BoardManager.Instance.currentPlayerInCheck)
                     {
-                        _allowedSquares.Add(pieceIndex + 9);
+                        if (pieceRightType == Piece.Pawn && pieceRightColor == Piece.White)
+                        {
+                            _allowedSquares.Add(pieceIndex - 7);
+                        }
                     }
+
+                    BoardManager.Instance.currentPlayerInCheck = tempCheck;
+                    tempSquares.CopyTo(BoardManager.Instance.square, 0);
                 }
             }
             else if (file == BoardManager.Instance.epFile + 1)
             {
-                if (rank == 4)
+                if (rank == 3)
                 {
                     int squareLeft = pieceIndex - 1;
                     int pieceLeft = BoardManager.Instance.square[squareLeft];
                     int pieceLeftType = Piece.PieceType(pieceLeft);
-                    int pieceLefttColor = Piece.Color(pieceLeft);
+                    int pieceLeftColor = Piece.Color(pieceLeft);
 
-                    if (pieceLeftType == Piece.Pawn && pieceLefttColor == Piece.Black)
+                    int[] tempSquares = new int[64];
+                    bool tempCheck = BoardManager.Instance.currentPlayerInCheck;
+                    int piece = BoardManager.Instance.square[pieceIndex];
+
+                    BoardManager.Instance.square.CopyTo(tempSquares, 0);
+
+                    BoardManager.Instance.square[pieceIndex - 9] = piece;
+                    BoardManager.Instance.square[pieceIndex] = 0;
+                    BoardManager.Instance.square[squareLeft] = 0;
+
+                    BoardManager.Instance.GenerateAllAttackedSquares();
+                    BoardManager.Instance.IsInCheck();
+
+                    ResetLists();
+
+                    if (!BoardManager.Instance.currentPlayerInCheck)
                     {
-                        _allowedSquares.Add(pieceIndex + 7);
+                        if (pieceLeftType == Piece.Pawn && pieceLeftColor == Piece.White)
+                        {
+                            _allowedSquares.Add(pieceIndex - 9);
+                        }
                     }
+
+                    BoardManager.Instance.currentPlayerInCheck = tempCheck;
+                    tempSquares.CopyTo(BoardManager.Instance.square, 0);
                 }
             }
-        } else
-        {
+
             bool moveOne = MoveGenerator.IsSquareFree(pieceIndex - 8);
             if (moveOne)
             {
                 _allowedSquares.Add(pieceIndex - 8);
             }
-                
             
             if (rank == 6)
             {
@@ -116,38 +245,6 @@ public static class GeneratePseudoLegal
                     _allowedSquares.Add(squareDownLeft);
                 }
             }
-            if (file == BoardManager.Instance.epFile - 1)
-            {
-                if (rank == 3)
-                {
-                    int squareRight = pieceIndex + 1;
-                    int pieceRight = BoardManager.Instance.square[squareRight];
-                    int pieceRightType = Piece.PieceType(pieceRight);
-                    int pieceRightColor = Piece.Color(pieceRight);
-
-                    if (pieceRightType == Piece.Pawn && pieceRightColor == Piece.White)
-                    {
-                        _allowedSquares.Add(pieceIndex - 7);
-                    }
-                }
-            }
-            else if (file == BoardManager.Instance.epFile + 1)
-            {
-                if (rank == 3)
-                {
-                    int squareLeft = pieceIndex - 1;
-                    int pieceLeft = BoardManager.Instance.square[squareLeft];
-                    int pieceLeftType = Piece.PieceType(pieceLeft);
-                    int pieceLeftColor = Piece.Color(pieceLeft);
-
-                    Debug.Log("Checking for EP");
-
-                    if (pieceLeftType == Piece.Pawn && pieceLeftColor == Piece.White)
-                    {
-                        _allowedSquares.Add(pieceIndex - 9);
-                    }
-                }
-            }
         }
 
         return _allowedSquares;
@@ -155,8 +252,7 @@ public static class GeneratePseudoLegal
 
     public static List<int> GenerateKingPseudoLegal(int pieceIndex, int pieceColor)
     {
-        _allowedSquares = new List<int>();
-        _attackedSquares = new List<int>();
+        ResetLists();
 
         int rank = pieceIndex / 8;
         int file = pieceIndex % 8;
@@ -283,6 +379,10 @@ public static class GeneratePseudoLegal
             }
         }
 
+        foreach (int square in _attackedSquares)
+        {
+            Debug.Log("King is attacking: " + square);
+        }
 
         return _allowedSquares;
     }

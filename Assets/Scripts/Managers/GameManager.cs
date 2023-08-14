@@ -31,8 +31,8 @@ public class GameManager : MonoBehaviour
             case GameState.SelectColor:
                 bool isWhite = true;
                 BoardManager.Instance.playerWhite = isWhite;
-                BoardManager.Instance.GenerateGrid();
                 BoardManager.Instance.LoadStartPosition();
+                BoardManager.Instance.GenerateGrid();
                 BoardManager.Instance.DrawPieces();
                 Debug.Log("Called Board Manager");
                 break;

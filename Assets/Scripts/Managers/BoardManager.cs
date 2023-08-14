@@ -2,12 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour
 {
     [SerializeField] private int _width, _height;
     [SerializeField] private Tile _tilePrefab;
     [SerializeField] private Transform _cam;
+
+    public Canvas gameCanvas;
+    public Button rewindButton, forwardButton, skipLastButton, skipFirstButton;
 
     public static BoardManager Instance;
     public Sprite[] whiteSprites;
@@ -30,10 +34,9 @@ public class BoardManager : MonoBehaviour
     public int whiteIndex = 0;
     public int blackIndex = 1;
 
-    public int plyCount;
-    public int fiftyMoveCounter;
-    public uint currentGameState;
-    Stack<uint> gameStateHistory;
+    public int plyCount, fiftyMoveCounter, currentBoardHistoryIndex;
+    Stack<int[]> boardHistory;
+    Stack<int[]> highlightHistory;
 
     public bool whiteCastleKingside, whiteCastleQueenside, blackCastleKingside, blackCastleQueenside;
     public int epFile;
@@ -55,6 +58,10 @@ public class BoardManager : MonoBehaviour
         foreach (GameObject _tileObj in _tileObjects)
             Destroy(_tileObj);
 
+        int index = whiteToMove? whiteIndex : blackIndex;
+        int rank = kingSquares[index] / 8;
+        int file = kingSquares[index] % 8;
+
         for (int x = 0; x < _width; x++)
         {
             for (int y = 0; y < _height; y++)
@@ -63,6 +70,7 @@ public class BoardManager : MonoBehaviour
                 spawnedTile.name = $"Tile {x} {y}";
                 spawnedTile.GetComponent<SpriteRenderer>().sortingLayerName = "Regular Tile";
                 spawnedTile.tag = "Tile";
+                spawnedTile.transform.SetParent(gameCanvas.transform, false);
 
                 var isDarkColor = (x + y) % 2 == 0;
                 spawnedTile.Init(isDarkColor);
@@ -72,6 +80,7 @@ public class BoardManager : MonoBehaviour
                     var highlightTile = Instantiate(_tilePrefab, new Vector3(x, y), Quaternion.identity);
                     highlightTile.tag = "Tile";
                     highlightTile.GetComponent<SpriteRenderer>().sortingLayerName = "Highlight Tile";
+                    highlightTile.transform.SetParent(gameCanvas.transform, false);
                     highlightTile.Highlight();
                 }
 
@@ -80,22 +89,12 @@ public class BoardManager : MonoBehaviour
                     var highlightTile = Instantiate(_tilePrefab, new Vector3(x, y), Quaternion.identity);
                     highlightTile.tag = "Tile";
                     highlightTile.GetComponent<SpriteRenderer>().sortingLayerName = "Highlight Tile";
+                    highlightTile.transform.SetParent(gameCanvas.transform, false);
                     highlightTile.Highlight();
                 }
                 
-                if (currentPlayerInCheck && whiteToMove)
+                if (currentPlayerInCheck)
                 {
-                    int rank = kingSquares[0] / 8;
-                    int file = kingSquares[0] % 8;
-
-                    if (x == file && y == rank)
-                        spawnedTile.Check();
-                }
-                else if (currentPlayerInCheck)
-                {
-                    int rank = kingSquares[1] / 8;
-                    int file = kingSquares[1] % 8;
-
                     if (x == file && y == rank)
                         spawnedTile.Check();
                 }
@@ -109,15 +108,21 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        _cam.transform.position = new Vector3((float)_width/2 -0.5f, (float)_height/2 -0.5f, -10);
+        //_cam.transform.SetParent(gameCanvas.transform, false);
+        //_cam.transform.position = new Vector3(0, 0, -10);
     }
 
     public void LoadStartPosition()
     {
+        rewindButton.interactable = false;
+        forwardButton.interactable = false;
+        skipFirstButton.interactable = false;
+        skipLastButton.interactable = false;
+
         LoadPosition(FenUtility.startFen);
 
-        kingSquares[0] = 4;
-        kingSquares[1] = 60;
+        kingSquares[whiteIndex] = 4;
+        kingSquares[blackIndex] = 60;
 
         whiteToMove = true;
     }
@@ -147,6 +152,14 @@ public class BoardManager : MonoBehaviour
             System.Array.Reverse(square);
 
         GenerateAllowedMoves();
+
+        boardHistory.Push(square.Clone() as int[]);
+        currentBoardHistoryIndex = 0;
+
+        int[] highlightArr = new int[2];
+        highlightArr[0] = 10;
+        highlightArr[1] = 10;
+        highlightHistory.Push(highlightArr.Clone() as int[]);
     }
 
     public void DrawPieces()
@@ -168,11 +181,12 @@ public class BoardManager : MonoBehaviour
                 pieceObj.AddComponent<BoxCollider2D>();
                 pieceObj.GetComponent<BoxCollider2D>().size = new Vector2(3f, 3f);
                 pieceObj.gameObject.tag = "Piece";
+                pieceObj.transform.SetParent(gameCanvas.transform, true);
 
                 SpriteRenderer pieceRenderer = pieceObj.AddComponent<SpriteRenderer>();
                 pieceRenderer.sortingLayerName = "Piece";
                 
-                pieceObj.transform.position = new Vector3(file, rank, -2);
+                pieceObj.transform.localPosition = new Vector3(file, rank, -2);
                 pieceObj.transform.localScale = new Vector3(0.25f, 0.25f, 1);
                 pieceObj.AddComponent<DragDrop>();
 
@@ -211,12 +225,13 @@ public class BoardManager : MonoBehaviour
         squaresAroundWhiteKing = new bool[8];
 
         playerWhite = true;
-        AIenabled = true;
+        AIenabled = false;
         currentPlayerInCheck = false;
         whiteToMove = true;
         checkmate = false;
 
-        gameStateHistory = new Stack<uint>();
+        boardHistory = new Stack<int[]>();
+        highlightHistory = new Stack<int[]>();
         plyCount = 0;
         fiftyMoveCounter = 0;
 
@@ -274,75 +289,7 @@ public class BoardManager : MonoBehaviour
         {
             Debug.Log("Current player is in check so let's remove some moves.");
 
-            int[] tempSquare = new int[64];
-
-            List<List<int>> tempAllowed = new List<List<int>>();
-            List<int> tempMoves = new List<int>();
-
-            foreach (List<int> moveList in allowedMoves)
-            {
-                square.CopyTo(tempSquare, 0);
-                tempMoves = new List<int>();
-
-                int pieceListIndex = allowedMoves.IndexOf(moveList);
-
-                if (pieceList[pieceListIndex] == -1)
-                    continue;
-                
-                int piece = square[pieceList[pieceListIndex]];
-
-                if (whiteToMove != Piece.IsColor(piece, Piece.White))
-                {
-                    continue;
-                }
-
-                int pieceType = Piece.PieceType(piece);
-                int kingColor = Piece.IsColor(piece, Piece.White)? 0 : 1;
-
-                foreach (int move in moveList)
-                {
-                    square[move] = piece;
-                    square[pieceList[pieceListIndex]] = 0;
-                    int oldKingSquare = kingSquares[kingColor];
-
-                    if (pieceType == Piece.King)
-                        kingSquares[kingColor] = move;
-
-                    GenerateAllAttackedSquares();
-                    IsInCheck();
-
-                    if (currentPlayerInCheck)
-                    {
-                        tempMoves.Add(move);
-                    }
-
-                    tempSquare.CopyTo(square, 0);
-                    kingSquares[kingColor] = oldKingSquare;
-                }
-
-                tempAllowed.Add(tempMoves);
-            }
-
-            int tempCounter = 0;
-
-            for (int i = 0; i < allowedMoves.Count; i++)
-            {
-                int pieceListIndex = i;
-
-                if (pieceList[i] == -1)
-                    continue;
-
-                int piece = square[pieceList[pieceListIndex]];
-
-                if (whiteToMove != Piece.IsColor(piece, Piece.White))
-                {
-                    continue;
-                }
-
-                allowedMoves[pieceListIndex] = allowedMoves[pieceListIndex].Except(tempAllowed[tempCounter]).ToList();
-
-                tempCounter++;
-            }
+            RemoveIllegalMoves();
         }
     }
 
@@ -369,6 +316,11 @@ public class BoardManager : MonoBehaviour
             {
                 continue;
             }
+        }
+
+        foreach (int attacked in attackedSquares)
+        {
+            Debug.Log("Attacked: " + attacked);
         }
     }
 
@@ -415,18 +367,94 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    public void RemoveIllegalMoves()
+    {
+        int[] tempSquare = new int[64];
+        bool tempCheck = currentPlayerInCheck;
+
+        List<List<int>> tempAllowed = new List<List<int>>();
+        List<int> tempMoves = new List<int>();
+
+        foreach (List<int> moveList in allowedMoves)
+        {
+            square.CopyTo(tempSquare, 0);
+            tempMoves = new List<int>();
+
+            int pieceListIndex = allowedMoves.IndexOf(moveList);
+
+            if (pieceList[pieceListIndex] == -1)
+                continue;
+            
+            int piece = square[pieceList[pieceListIndex]];
+
+            if (whiteToMove != Piece.IsColor(piece, Piece.White))
+            {
+                continue;
+            }
+
+            int pieceType = Piece.PieceType(piece);
+            int kingColor = Piece.IsColor(piece, Piece.White)? whiteIndex : blackIndex;
+
+            foreach (int move in moveList)
+            {
+                square[move] = piece;
+                square[pieceList[pieceListIndex]] = 0;
+                int oldKingSquare = kingSquares[kingColor];
+
+                if (pieceType == Piece.King)
+                    kingSquares[kingColor] = move;
+
+                GenerateAllAttackedSquares();
+                IsInCheck();
+
+                if (currentPlayerInCheck)
+                {
+                    tempMoves.Add(move);
+                }
+
+                tempSquare.CopyTo(square, 0);
+                kingSquares[kingColor] = oldKingSquare;
+            }
+
+            tempAllowed.Add(tempMoves);
+        }
+
+        int tempCounter = 0;
+
+        for (int i = 0; i < allowedMoves.Count; i++)
+        {
+            int pieceListIndex = i;
+
+            if (pieceList[i] == -1)
+                continue;
+
+            int piece = square[pieceList[pieceListIndex]];
+
+            if (whiteToMove != Piece.IsColor(piece, Piece.White))
+            {
+                continue;
+            }
+
+            allowedMoves[pieceListIndex] = allowedMoves[pieceListIndex].Except(tempAllowed[tempCounter]).ToList();
+
+            tempCounter++;
+        }
+
+        currentPlayerInCheck = tempCheck;
+    }
+
     public void IsInCheck()
     {
         if (whiteToMove)
         {
-            if (attackedSquares.Contains(kingSquares[0]))
+            if (attackedSquares.Contains(kingSquares[whiteIndex]))
                 currentPlayerInCheck = true;
             else
                 currentPlayerInCheck = false;
         }
         else
         {
-            if (attackedSquares.Contains(kingSquares[1]))
+            if (attackedSquares.Contains(kingSquares[blackIndex]))
                 currentPlayerInCheck = true;
             else
                 currentPlayerInCheck = false;
@@ -503,7 +531,7 @@ public class BoardManager : MonoBehaviour
         {
             if (pieceColor == Piece.White)
             {
-                kingSquares[0] = rank * 8 + file;
+                kingSquares[whiteIndex] = rank * 8 + file;
 
                 if (rank * 8 + file == 6 && whiteCastleKingside && square[7] == 14)
                 {
@@ -521,7 +549,7 @@ public class BoardManager : MonoBehaviour
             }
             else
             {
-                kingSquares[1] = rank * 8 + file;
+                kingSquares[blackIndex] = rank * 8 + file;
 
                 if (rank * 8 + file == 62 && blackCastleKingside && square[63] == 22)
                 {
@@ -561,6 +589,18 @@ public class BoardManager : MonoBehaviour
         if (takenPieceIndex != -1)
         {
             int takenPieceListIndex = pieceList.IndexOf(takenPieceIndex);
+
+            if (Piece.PieceType(square[pieceList[takenPieceListIndex]]) == Piece.Rook)
+            {
+                if (pieceList[takenPieceListIndex] == 0)
+                    whiteCastleQueenside = false;
+                else if (pieceList[takenPieceListIndex] == 7)
+                    whiteCastleKingside = false;
+                else if (pieceList[takenPieceListIndex] == 56)
+                    blackCastleQueenside = false;
+                else if (pieceList[takenPieceListIndex] == 63)
+                    blackCastleKingside = false;
+            }
             pieceList[takenPieceListIndex] = -1;
 
             Debug.Log("Piece at: " + takenPieceIndex + " was taken!");
@@ -596,6 +636,9 @@ public class BoardManager : MonoBehaviour
         GenerateGrid(startRank, startFile, rank, file);
         DrawPieces();
 
+        rewindButton.interactable = true;
+        skipFirstButton.interactable = true;
+
         plyCount++;
 
         if (currentPlayerInCheck)
@@ -611,8 +654,6 @@ public class BoardManager : MonoBehaviour
                 
                 if (moveList.Count != 0)
                 {
-                    foreach (int move in moveList)
-                        Debug.Log(move);
                     checkmate = false;
                     break;
                 }
@@ -623,6 +664,14 @@ public class BoardManager : MonoBehaviour
         Debug.Log("Checkmate? " + checkmate);
 
         soundPlayer.PlayOneShot(clipToPlay);
+
+        boardHistory.Push(square.Clone() as int[]);
+        currentBoardHistoryIndex = 0;
+
+        int[] highlightArr = new int[2];
+        highlightArr[0] = startRank * 8 + startFile;
+        highlightArr[1] = rank * 8 + file;
+        highlightHistory.Push(highlightArr.Clone() as int[]);
 
         TurnHandler();
     }
@@ -659,5 +708,109 @@ public class BoardManager : MonoBehaviour
         Vector3 newPos = AIManager.Instance.newPosition;
 
         MakeMove(piece, startFile, startRank, newPos);
+    }
+
+    public void UnmakeMove()
+    {
+        Debug.Log("Unmaking move.");
+        int length = boardHistory.Count;
+
+        boardHistory.ElementAt(currentBoardHistoryIndex + 1).CopyTo(square, 0);
+
+        int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] % 8;
+        int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] / 8;
+        int file = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[1] % 8;
+        int rank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[1] / 8;
+
+        IsInCheck();
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+        currentBoardHistoryIndex++;
+
+        forwardButton.interactable = true;
+        skipLastButton.interactable = true;
+
+        if (currentBoardHistoryIndex + 1 == length)
+        {
+            rewindButton.interactable = false;
+            skipFirstButton.interactable = false;
+        }
+    }
+
+    public void RemakeMove()
+    {
+        Debug.Log("Remaking move.");
+        
+        boardHistory.ElementAt(currentBoardHistoryIndex - 1).CopyTo(square, 0);
+
+        int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] % 8;
+        int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] / 8;
+        int file = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[1] % 8;
+        int rank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[1] / 8;
+
+        IsInCheck();
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+        currentBoardHistoryIndex--;
+
+        rewindButton.interactable = true;
+        skipFirstButton.interactable = true;
+
+        if (currentBoardHistoryIndex == 0)
+        {
+            forwardButton.interactable = false;
+            skipLastButton.interactable = false;
+        }
+    }
+
+    public void JumpToFirstPosition()
+    {
+        Debug.Log("Jumping to earliest position.");
+        int length = boardHistory.Count;
+
+        boardHistory.ElementAt(length - 1).CopyTo(square, 0);
+
+        int startFile = highlightHistory.ElementAt(length - 1)[0] % 8;
+        int startRank = highlightHistory.ElementAt(length - 1)[0] / 8;
+        int file = highlightHistory.ElementAt(length - 1)[1] % 8;
+        int rank = highlightHistory.ElementAt(length - 1)[1] / 8;
+
+        IsInCheck();
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+        currentBoardHistoryIndex = length - 1;
+
+        rewindButton.interactable = false;
+        skipFirstButton.interactable = false;
+
+        forwardButton.interactable = true;
+        skipLastButton.interactable = true;
+    }
+
+    public void JumpToLatestPosition()
+    {
+        Debug.Log("Jumping to most recent position.");
+
+        boardHistory.ElementAt(0).CopyTo(square, 0);
+
+        int startFile = highlightHistory.ElementAt(0)[0] % 8;
+        int startRank = highlightHistory.ElementAt(0)[0] / 8;
+        int file = highlightHistory.ElementAt(0)[1] % 8;
+        int rank = highlightHistory.ElementAt(0)[1] / 8;
+
+        IsInCheck();
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+        currentBoardHistoryIndex = 0;
+
+        forwardButton.interactable = false;
+        skipLastButton.interactable = false;
+
+        rewindButton.interactable = true;
+        skipFirstButton.interactable = true;
     }
 }

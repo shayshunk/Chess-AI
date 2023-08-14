@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -8,13 +9,20 @@ public class DragDrop : MonoBehaviour
     private bool _dragging;
     private Vector2 _offset;
     private Vector3 _origPos, placedPos;
-    public GameObject _circlePrefab;
     private GameObject[] _circleObjects;
+
+    public GameObject _circlePrefab;
     public int piece, file, rank;
+    public Canvas gameCanvas;
 
     void Awake()
     {
         _origPos = new Vector3(file, rank, -2);
+    }
+
+    void Start()
+    {
+        gameCanvas = BoardManager.Instance.gameCanvas;
     }
 
     void Update()
@@ -53,6 +61,7 @@ public class DragDrop : MonoBehaviour
                 int newFile = index % 8;
                 GameObject highlightCircle = Instantiate(Resources.Load("Circle") as GameObject, new Vector3(newFile, newRank, -2), Quaternion.identity);
                 highlightCircle.tag = "Circle";
+                highlightCircle.transform.SetParent(gameCanvas.transform, false);
             }
         }
     }
@@ -61,10 +70,6 @@ public class DragDrop : MonoBehaviour
     {
         if (_dragging == true)
         {
-            var mousePos = GetMousePos();
-
-            placedPos = mousePos - _offset;
-            placedPos.z = -2;
 
             _dragging = false;
 
@@ -73,6 +78,10 @@ public class DragDrop : MonoBehaviour
             {
                 Destroy(circleObject);
             }
+
+            placedPos = this.transform.position;
+            placedPos = placedPos - gameCanvas.transform.position;
+            placedPos = placedPos/gameCanvas.scaleFactor;
 
             BoardManager.Instance.MakeMove(piece, file, rank, placedPos);
         }

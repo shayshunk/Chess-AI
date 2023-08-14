@@ -79,6 +79,7 @@ public static class MoveGenerator
         {
             List<int> tempSquares = new List<int>();
             tempSquares = GeneratePseudoLegal.GenerateKingPseudoLegal(pieceIndex, pieceColor);
+            attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
             
             allowedSquares = tempSquares.Except(BoardManager.Instance.attackedSquares).ToList();
         }

@@ -2,12 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Evaluator))]
+
 public class AIManager : MonoBehaviour
 {
-   public static AIManager Instance;
-   private bool _playerWhite;
-   public int piece, startFile, startRank;
-   public Vector3 newPosition;
+    public static AIManager Instance;
+    public int piece, startFile, startRank;
+    public Vector3 newPosition;
+
+    private bool _playerWhite;
+    private float _evaluation;
 
     void Awake()
     {
@@ -19,9 +23,19 @@ public class AIManager : MonoBehaviour
         _playerWhite = BoardManager.Instance.playerWhite;
     }
 
-    public void MakeMove()
+    public void ChooseBestMove()
     {
-        MakeRandomMove();
+        Chesster chesster = new Chesster();
+
+        int[] tempBoard = new int[64];
+        BoardManager.Instance.square.CopyTo(tempBoard, 0);
+
+        chesster.BeginThinking(tempBoard);
+    }
+
+    public void MakeMove()
+    {   
+        //MakeRandomMove();
     }
 
     private void MakeRandomMove()
@@ -60,5 +74,9 @@ public class AIManager : MonoBehaviour
         int rank = BoardManager.Instance.allowedMoves[randomPiece][randomMove] / 8;
 
         newPosition = new Vector3(file, rank, -2);  
+    }
+    private void Evaluation()
+    {
+        _evaluation = Evaluator.GetEvaluation();
     }
 }
