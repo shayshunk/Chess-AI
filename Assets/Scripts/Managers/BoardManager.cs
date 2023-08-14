@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,8 +36,10 @@ public class BoardManager : MonoBehaviour
     public int blackIndex = 1;
 
     public int plyCount, fiftyMoveCounter, currentBoardHistoryIndex;
+    public bool whiteToMoveStart, whiteToMoveEnd;
     Stack<int[]> boardHistory;
     Stack<int[]> highlightHistory;
+    Stack<List<int>> pieceListHistory;
 
     public bool whiteCastleKingside, whiteCastleQueenside, blackCastleKingside, blackCastleQueenside;
     public int epFile;
@@ -125,6 +128,7 @@ public class BoardManager : MonoBehaviour
         kingSquares[blackIndex] = 60;
 
         whiteToMove = true;
+        whiteToMoveStart = whiteToMove;
     }
 
     public void LoadPosition(string fen)
@@ -154,6 +158,8 @@ public class BoardManager : MonoBehaviour
         GenerateAllowedMoves();
 
         boardHistory.Push(square.Clone() as int[]);
+        List<int> tempPieceList = new List<int>(pieceList);
+        pieceListHistory.Push(tempPieceList);
         currentBoardHistoryIndex = 0;
 
         int[] highlightArr = new int[2];
@@ -232,6 +238,7 @@ public class BoardManager : MonoBehaviour
 
         boardHistory = new Stack<int[]>();
         highlightHistory = new Stack<int[]>();
+        pieceListHistory = new Stack<List<int>>();
         plyCount = 0;
         fiftyMoveCounter = 0;
 
@@ -316,11 +323,6 @@ public class BoardManager : MonoBehaviour
             {
                 continue;
             }
-        }
-
-        foreach (int attacked in attackedSquares)
-        {
-            Debug.Log("Attacked: " + attacked);
         }
     }
 
@@ -494,6 +496,7 @@ public class BoardManager : MonoBehaviour
         }
         
         whiteToMove = !whiteToMove;
+        whiteToMoveEnd = whiteToMove;
 
         pinnedPieces.Clear();
         pinnedDirection.Clear();
@@ -612,7 +615,6 @@ public class BoardManager : MonoBehaviour
         if (pieceListIndex != -1)
             pieceList[pieceListIndex] = rank * 8 + file;
         
-
         if (whiteToMove)
             squaresAroundWhiteKing = PinHandler.GeneratePins();
         
@@ -665,8 +667,18 @@ public class BoardManager : MonoBehaviour
 
         soundPlayer.PlayOneShot(clipToPlay);
 
+        while (currentBoardHistoryIndex != 0)
+        {
+            boardHistory.Pop();
+            pieceListHistory.Pop();
+            highlightHistory.Pop();
+            currentBoardHistoryIndex--;
+        }
+
         boardHistory.Push(square.Clone() as int[]);
-        currentBoardHistoryIndex = 0;
+        List<int> tempPieceList = new List<int>(pieceList);
+        pieceListHistory.Push(tempPieceList);
+
 
         int[] highlightArr = new int[2];
         highlightArr[0] = startRank * 8 + startFile;
@@ -716,13 +728,32 @@ public class BoardManager : MonoBehaviour
         int length = boardHistory.Count;
 
         boardHistory.ElementAt(currentBoardHistoryIndex + 1).CopyTo(square, 0);
+        pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex + 1);
 
         int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] % 8;
         int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] / 8;
         int file = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[1] % 8;
         int rank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[1] / 8;
 
+        kingSquares[whiteIndex] = Array.IndexOf(square, 9);
+        kingSquares[blackIndex] = Array.IndexOf(square, 17);
+
+        whiteToMove = !whiteToMove;
+
+        if (whiteToMove)
+            squaresAroundWhiteKing = PinHandler.GeneratePins();
+        
+        else
+            squaresAroundBlackKing = PinHandler.GeneratePins();
+
+        pinnedPieces = PinHandler.GetPins();
+        if (pinnedPieces.Count != 0)
+            pinnedDirection = PinHandler.GetPinDirections();
+
+        GenerateAllAttackedSquares();
         IsInCheck();
+
+        GenerateAllowedMoves();
 
         GenerateGrid(startRank, startFile, rank, file);
         DrawPieces();
@@ -743,13 +774,32 @@ public class BoardManager : MonoBehaviour
         Debug.Log("Remaking move.");
         
         boardHistory.ElementAt(currentBoardHistoryIndex - 1).CopyTo(square, 0);
+        pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex - 1);
 
         int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] % 8;
         int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] / 8;
         int file = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[1] % 8;
         int rank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[1] / 8;
 
+        kingSquares[whiteIndex] = Array.IndexOf(square, 9);
+        kingSquares[blackIndex] = Array.IndexOf(square, 17);
+
+        whiteToMove = !whiteToMove;
+
+        if (whiteToMove)
+            squaresAroundWhiteKing = PinHandler.GeneratePins();
+        
+        else
+            squaresAroundBlackKing = PinHandler.GeneratePins();
+
+        pinnedPieces = PinHandler.GetPins();
+        if (pinnedPieces.Count != 0)
+            pinnedDirection = PinHandler.GetPinDirections();
+
+        GenerateAllAttackedSquares();
         IsInCheck();
+
+        GenerateAllowedMoves();
 
         GenerateGrid(startRank, startFile, rank, file);
         DrawPieces();
@@ -771,13 +821,32 @@ public class BoardManager : MonoBehaviour
         int length = boardHistory.Count;
 
         boardHistory.ElementAt(length - 1).CopyTo(square, 0);
+        pieceList = pieceListHistory.ElementAt(length - 1);
 
         int startFile = highlightHistory.ElementAt(length - 1)[0] % 8;
         int startRank = highlightHistory.ElementAt(length - 1)[0] / 8;
         int file = highlightHistory.ElementAt(length - 1)[1] % 8;
         int rank = highlightHistory.ElementAt(length - 1)[1] / 8;
 
+        kingSquares[whiteIndex] = Array.IndexOf(square, 9);
+        kingSquares[blackIndex] = Array.IndexOf(square, 17);
+
+        whiteToMove = whiteToMoveStart;
+
+        if (whiteToMove)
+            squaresAroundWhiteKing = PinHandler.GeneratePins();
+        
+        else
+            squaresAroundBlackKing = PinHandler.GeneratePins();
+
+        pinnedPieces = PinHandler.GetPins();
+        if (pinnedPieces.Count != 0)
+            pinnedDirection = PinHandler.GetPinDirections();
+
+        GenerateAllAttackedSquares();
         IsInCheck();
+
+        GenerateAllowedMoves();
 
         GenerateGrid(startRank, startFile, rank, file);
         DrawPieces();
@@ -795,13 +864,32 @@ public class BoardManager : MonoBehaviour
         Debug.Log("Jumping to most recent position.");
 
         boardHistory.ElementAt(0).CopyTo(square, 0);
+        pieceList = pieceListHistory.ElementAt(0);
 
         int startFile = highlightHistory.ElementAt(0)[0] % 8;
         int startRank = highlightHistory.ElementAt(0)[0] / 8;
         int file = highlightHistory.ElementAt(0)[1] % 8;
         int rank = highlightHistory.ElementAt(0)[1] / 8;
 
+        kingSquares[whiteIndex] = Array.IndexOf(square, 9);
+        kingSquares[blackIndex] = Array.IndexOf(square, 17);
+
+        whiteToMove = whiteToMoveEnd;
+
+        if (whiteToMove)
+            squaresAroundWhiteKing = PinHandler.GeneratePins();
+        
+        else
+            squaresAroundBlackKing = PinHandler.GeneratePins();
+
+        pinnedPieces = PinHandler.GetPins();
+        if (pinnedPieces.Count != 0)
+            pinnedDirection = PinHandler.GetPinDirections();
+
+        GenerateAllAttackedSquares();
         IsInCheck();
+        
+        GenerateAllowedMoves();
 
         GenerateGrid(startRank, startFile, rank, file);
         DrawPieces();

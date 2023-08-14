@@ -379,11 +379,6 @@ public static class GeneratePseudoLegal
             }
         }
 
-        foreach (int square in _attackedSquares)
-        {
-            Debug.Log("King is attacking: " + square);
-        }
-
         return _allowedSquares;
     }
 
