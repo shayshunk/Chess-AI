@@ -37,6 +37,7 @@ public class BoardManager : MonoBehaviour
 
     public int plyCount, fiftyMoveCounter, currentBoardHistoryIndex;
     public bool whiteToMoveStart, whiteToMoveEnd;
+    Stack<int> epFileHistory;
     Stack<int[]> boardHistory;
     Stack<int[]> highlightHistory;
     Stack<List<int>> pieceListHistory;
@@ -162,6 +163,8 @@ public class BoardManager : MonoBehaviour
         pieceListHistory.Push(tempPieceList);
         currentBoardHistoryIndex = 0;
 
+        epFileHistory.Push(epFile);
+
         int[] highlightArr = new int[2];
         highlightArr[0] = 10;
         highlightArr[1] = 10;
@@ -236,6 +239,7 @@ public class BoardManager : MonoBehaviour
         whiteToMove = true;
         checkmate = false;
 
+        epFileHistory = new Stack<int>();
         boardHistory = new Stack<int[]>();
         highlightHistory = new Stack<int[]>();
         pieceListHistory = new Stack<List<int>>();
@@ -679,6 +683,7 @@ public class BoardManager : MonoBehaviour
         List<int> tempPieceList = new List<int>(pieceList);
         pieceListHistory.Push(tempPieceList);
 
+        epFileHistory.Push(epFile);
 
         int[] highlightArr = new int[2];
         highlightArr[0] = startRank * 8 + startFile;
@@ -729,6 +734,7 @@ public class BoardManager : MonoBehaviour
 
         boardHistory.ElementAt(currentBoardHistoryIndex + 1).CopyTo(square, 0);
         pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex + 1);
+        epFile = epFileHistory.ElementAt(currentBoardHistoryIndex + 1);
 
         int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] % 8;
         int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] / 8;
@@ -775,6 +781,7 @@ public class BoardManager : MonoBehaviour
         
         boardHistory.ElementAt(currentBoardHistoryIndex - 1).CopyTo(square, 0);
         pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex - 1);
+        epFile = epFileHistory.ElementAt(currentBoardHistoryIndex - 1);
 
         int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] % 8;
         int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] / 8;
@@ -822,6 +829,7 @@ public class BoardManager : MonoBehaviour
 
         boardHistory.ElementAt(length - 1).CopyTo(square, 0);
         pieceList = pieceListHistory.ElementAt(length - 1);
+        epFile = epFileHistory.ElementAt(length - 1);
 
         int startFile = highlightHistory.ElementAt(length - 1)[0] % 8;
         int startRank = highlightHistory.ElementAt(length - 1)[0] / 8;
@@ -865,6 +873,7 @@ public class BoardManager : MonoBehaviour
 
         boardHistory.ElementAt(0).CopyTo(square, 0);
         pieceList = pieceListHistory.ElementAt(0);
+        epFile = epFileHistory.ElementAt(0);
 
         int startFile = highlightHistory.ElementAt(0)[0] % 8;
         int startRank = highlightHistory.ElementAt(0)[0] / 8;
