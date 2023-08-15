@@ -169,6 +169,9 @@ public class BoardManager : MonoBehaviour
         highlightArr[0] = 100;
         highlightArr[1] = 100;
         highlightHistory.Push(highlightArr.Clone() as int[]);
+
+        //int numPositions = MoveGenerationTest(2);
+        //Debug.Log("Positions found: " + numPositions);
     }
 
     public void DrawPieces()
@@ -298,7 +301,7 @@ public class BoardManager : MonoBehaviour
 
         if (currentPlayerInCheck)
         {
-            Debug.Log("Current player is in check so let's remove some moves.");
+            //Debug.Log("Current player is in check so let's remove some moves.");
 
             RemoveIllegalMoves();
         }
@@ -360,7 +363,7 @@ public class BoardManager : MonoBehaviour
                 if (!(pieceType == Piece.Queen || pieceType == Piece.Bishop || pieceType == Piece.Rook))
                     continue;
                 
-                Debug.Log("Regenerating attacked squares for: " + square[pieceList[i]]);
+                //Debug.Log("Regenerating attacked squares for: " + square[pieceList[i]]);
                 MoveGenerator.GenerateLegal(pieceList[i], currentPlayerInCheck);
                 tempAttackedSquares = MoveGenerator.GetAttackedSquares();
 
@@ -469,7 +472,7 @@ public class BoardManager : MonoBehaviour
 
     public void MakeMove(int pieceIndex, int newIndex)
     {
-        Debug.Log("Make move called.");
+        //Debug.Log("Make move called.");
 
         AudioClip clipToPlay = regularMove;
         
@@ -614,7 +617,7 @@ public class BoardManager : MonoBehaviour
             }
             pieceList[takenPieceListIndex] = -1;
 
-            Debug.Log("Piece at: " + takenPieceIndex + " was taken!");
+            //Debug.Log("Piece at: " + takenPieceIndex + " was taken!");
         }
 
         square[startRank * 8 + startFile] = 0;
@@ -670,8 +673,8 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        Debug.Log("Current player in check?: " + currentPlayerInCheck);
-        Debug.Log("Checkmate? " + checkmate);
+        //Debug.Log("Current player in check?: " + currentPlayerInCheck);
+        //Debug.Log("Checkmate? " + checkmate);
 
         soundPlayer.PlayOneShot(clipToPlay);
 
@@ -708,7 +711,7 @@ public class BoardManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("Trying to make move through AI");
+        //Debug.Log("Trying to make move through AI");
         
         if (playerWhite && !whiteToMove)
         {
@@ -734,7 +737,7 @@ public class BoardManager : MonoBehaviour
 
     public void UnmakeMove()
     {
-        Debug.Log("Unmaking move.");
+        //Debug.Log("Unmaking move.");
         int length = boardHistory.Count;
 
         boardHistory.ElementAt(currentBoardHistoryIndex + 1).CopyTo(square, 0);
@@ -782,7 +785,7 @@ public class BoardManager : MonoBehaviour
 
     public void RemakeMove()
     {
-        Debug.Log("Remaking move.");
+        //Debug.Log("Remaking move.");
         
         boardHistory.ElementAt(currentBoardHistoryIndex - 1).CopyTo(square, 0);
         pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex - 1);
@@ -833,7 +836,8 @@ public class BoardManager : MonoBehaviour
         int length = boardHistory.Count;
 
         boardHistory.ElementAt(length - 1).CopyTo(square, 0);
-        pieceList = pieceListHistory.ElementAt(length - 1);
+        List<int> tempPieces = new List<int>(pieceListHistory.ElementAt(length - 1));
+        pieceList = tempPieces;
         epFile = epFileHistory.ElementAt(length - 1);
 
         int startFile = highlightHistory.ElementAt(length - 1)[0] % 8;
@@ -914,5 +918,27 @@ public class BoardManager : MonoBehaviour
 
         rewindButton.interactable = true;
         skipFirstButton.interactable = true;
+    }
+
+    public int MoveGenerationTest (int depth)
+    {
+        int numPositions = 0;
+
+        while (depth != 0)
+        {
+            foreach (List<int> moveList in allowedMoves)
+            {
+                foreach (int move in moveList)
+                {
+                    int pieceListIndex = allowedMoves.IndexOf(moveList);
+                    int pieceIndex = pieceList[pieceListIndex];
+
+                    MakeMove(pieceIndex, move);
+
+                }
+            }
+        }
+
+        return numPositions;
     }
 }

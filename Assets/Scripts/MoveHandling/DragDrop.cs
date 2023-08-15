@@ -54,6 +54,14 @@ public class DragDrop : MonoBehaviour
 
             int pieceListIndex = BoardManager.Instance.pieceList.IndexOf(pieceIndex);
 
+            Debug.Log("Square at: " + pieceIndex);
+            Debug.Log("Piece list thinks: " + pieceListIndex);
+            
+            foreach (int index in BoardManager.Instance.pieceList)
+            {
+                Debug.Log("Piece list: " + index);
+            }
+
             List<int> allowedSquares = BoardManager.Instance.allowedMoves[pieceListIndex];
 
             foreach (int index in allowedSquares)
