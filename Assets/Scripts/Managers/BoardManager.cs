@@ -151,8 +151,11 @@ public class BoardManager : MonoBehaviour
         highlightArr[1] = 100;
         highlightHistory.Push(highlightArr.Clone() as int[]);
 
-        //int numPositions = MoveGenerationTest(2);
-        //Debug.Log("Positions found: " + numPositions);
+        Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
+                                        MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
+
+        int numPositions = MoveGenerationTest(currentBoard, 2);
+        Debug.Log("Positions found: " + numPositions);
     }
 
     public void DrawPieces()
@@ -498,7 +501,18 @@ public class BoardManager : MonoBehaviour
         
         int numPositions = 0;
 
-        foreach (List<int> moveList in board.allowedMoves)
+        List<List<int>> allowedMoves = new List<List<int>>(board.allowedMoves.Select(x => x.ToList()));
+
+        foreach (List<int> moveList in allowedMoves)
+        {
+            Debug.Log("For piece: " + allowedMoves.IndexOf(moveList));
+            foreach (int move in moveList)
+            {
+                Debug.Log("Can move to: " + move);
+            }
+        }
+
+        foreach (List<int> moveList in allowedMoves)
         {
             foreach (int move in moveList)
             {
@@ -511,8 +525,7 @@ public class BoardManager : MonoBehaviour
                 bool blackCastleQueenside = board.blackCastleQueenside;
                 board.square.CopyTo(tempSquare, 0);
 
-
-                int pieceListIndex = board.allowedMoves.IndexOf(moveList);
+                int pieceListIndex = allowedMoves.IndexOf(moveList);
                 int pieceIndex = board.pieceList[pieceListIndex];
 
                 PseudoMakeMove(board, pieceIndex, move);
@@ -530,6 +543,9 @@ public class BoardManager : MonoBehaviour
                 board.blackCastleKingside = blackCastleKingside;
                 board.blackCastleQueenside = blackCastleQueenside;
                 board.GenerateAllAttackedSquares();
+                board.IsInCheck();
+
+                board.GenerateAllowedMoves();
             }
         }
 
