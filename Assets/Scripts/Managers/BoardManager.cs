@@ -154,7 +154,7 @@ public class BoardManager : MonoBehaviour
         Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
                                         MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
 
-        int numPositions = MoveGenerationTest(currentBoard, 2);
+        int numPositions = MoveGenerationTest(currentBoard, 4);
         Debug.Log("Positions found: " + numPositions);
     }
 
@@ -505,15 +505,13 @@ public class BoardManager : MonoBehaviour
 
         foreach (List<int> moveList in allowedMoves)
         {
-            Debug.Log("For piece: " + allowedMoves.IndexOf(moveList));
-            foreach (int move in moveList)
-            {
-                Debug.Log("Can move to: " + move);
-            }
-        }
+            int pieceListIndex = allowedMoves.IndexOf(moveList);
+            int pieceIndex = board.pieceList[pieceListIndex];
+            int piece = board.square[pieceIndex];
 
-        foreach (List<int> moveList in allowedMoves)
-        {
+            if (Piece.IsColor(piece, Piece.White) != board.whiteToMove)
+                continue;
+
             foreach (int move in moveList)
             {
                 List<int> tempPieceList = new List<int>(board.pieceList);
@@ -524,9 +522,6 @@ public class BoardManager : MonoBehaviour
                 bool blackCastleKingside = board.blackCastleKingside;
                 bool blackCastleQueenside = board.blackCastleQueenside;
                 board.square.CopyTo(tempSquare, 0);
-
-                int pieceListIndex = allowedMoves.IndexOf(moveList);
-                int pieceIndex = board.pieceList[pieceListIndex];
 
                 PseudoMakeMove(board, pieceIndex, move);
 
