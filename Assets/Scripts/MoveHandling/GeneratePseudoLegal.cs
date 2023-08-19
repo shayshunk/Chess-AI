@@ -104,7 +104,7 @@ public static class GeneratePseudoLegal
             {
                 int squareUpTwo = pieceIndex + 16;
                 bool moveTwo = MoveGenerator.IsSquareFree(board, squareUpTwo);
-                if (moveTwo)
+                if (moveTwo && moveOne)
                 {
                     _allowedSquares.Add(squareUpTwo);
                 }
@@ -212,7 +212,7 @@ public static class GeneratePseudoLegal
             if (rank == 6)
             {
                 bool moveTwo = MoveGenerator.IsSquareFree(board, pieceIndex - 16);
-                if (moveTwo)
+                if (moveTwo && moveOne)
                 {
                     _allowedSquares.Add(pieceIndex - 16);
                 }

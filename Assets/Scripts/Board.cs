@@ -54,11 +54,17 @@ public class Board : MonoBehaviour
         }
 
         whiteToMove = whiteMove;
+
         whiteCastleKingside = whiteKingCastle;
         whiteCastleQueenside = whiteQueenCastle;
         blackCastleKingside = blackKingCastle;
         blackCastleQueenside = blackQueenCastle;
         epFile = ep;
+
+        PinHandler.GeneratePins(this);
+        pinnedPieces = PinHandler.GetPins();
+        if (pinnedPieces.Count != 0)
+            pinnedDirection = PinHandler.GetPinDirections();
 
         GenerateAllAttackedSquares();
         IsInCheck();
@@ -81,6 +87,13 @@ public class Board : MonoBehaviour
                    
                 List<int> allowedSquares = MoveGenerator.GenerateLegal(this, pieceList[i], currentPlayerInCheck);
                 allowedMoves.Add(allowedSquares.GetRange(0, allowedSquares.Count));
+            }
+
+            if (currentPlayerInCheck)
+            {
+                //Debug.Log("Current player is in check so let's remove some moves.");
+
+                RemoveIllegalMoves();
             }
 
             return;

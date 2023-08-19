@@ -64,7 +64,7 @@ public class BoardManager : MonoBehaviour
         foreach (GameObject _tileObj in _tileObjects)
             Destroy(_tileObj);
 
-        int index = whiteToMove? whiteIndex : blackIndex;
+        int index = MainBoard.whiteToMove? whiteIndex : blackIndex;
         int rank = MainBoard.kingSquares[index] / 8;
         int file = MainBoard.kingSquares[index] % 8;
 
@@ -109,6 +109,7 @@ public class BoardManager : MonoBehaviour
                     var highlightTile = Instantiate(_tilePrefab, new Vector3(x, y), Quaternion.identity);
                     highlightTile.tag = "Tile";
                     highlightTile.GetComponent<SpriteRenderer>().sortingLayerName = "Highlight Tile";
+                    highlightTile.transform.SetParent(gameCanvas.transform, false);
                     highlightTile.Attacked();
                 }*/
             }
@@ -122,9 +123,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.startFen);
-
-        whiteToMoveStart = MainBoard.whiteToMove;
+        LoadPosition(FenUtility.position4);
     }
 
     public void LoadPosition(string fen)
@@ -135,6 +134,10 @@ public class BoardManager : MonoBehaviour
 
         MainBoard = new Board(loadedPosition.epFile, loadedPosition.squares, loadedPosition.whiteToMove, loadedPosition.whiteCastleKingside, 
                             loadedPosition.whiteCastleQueenside, loadedPosition.blackCastleKingside, loadedPosition.blackCastleQueenside);
+
+        whiteToMoveStart = MainBoard.whiteToMove;
+        
+        Debug.Log("White to move? " + MainBoard.whiteToMove);
 
         if (!playerWhite)
             System.Array.Reverse(MainBoard.square);
@@ -154,7 +157,7 @@ public class BoardManager : MonoBehaviour
         Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
                                         MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
 
-        int numPositions = MoveGenerationTest(currentBoard, 4);
+        int numPositions = MoveGenerationTest(currentBoard, 2);
         Debug.Log("Positions found: " + numPositions);
     }
 
@@ -286,6 +289,12 @@ public class BoardManager : MonoBehaviour
         highlightArr[0] = startRank * 8 + startFile;
         highlightArr[1] = rank * 8 + file;
         highlightHistory.Push(highlightArr.Clone() as int[]);
+
+        Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
+                                        MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
+
+        int numPositions = MoveGenerationTest(currentBoard, 1);
+        Debug.Log("Positions found: " + numPositions);
 
         TurnHandler();
     }
@@ -502,11 +511,15 @@ public class BoardManager : MonoBehaviour
         int numPositions = 0;
 
         List<List<int>> allowedMoves = new List<List<int>>(board.allowedMoves.Select(x => x.ToList()));
+        List<int> pieceList = new List<int>(board.pieceList);
 
         foreach (List<int> moveList in allowedMoves)
         {
             int pieceListIndex = allowedMoves.IndexOf(moveList);
             int pieceIndex = board.pieceList[pieceListIndex];
+            //Debug.Log("For piece at: " + board.pieceList[pieceListIndex]);
+            if (pieceIndex == -1)
+                continue;
             int piece = board.square[pieceIndex];
 
             if (Piece.IsColor(piece, Piece.White) != board.whiteToMove)
@@ -514,6 +527,7 @@ public class BoardManager : MonoBehaviour
 
             foreach (int move in moveList)
             {
+                //Debug.Log("Can move to: " + move);
                 List<int> tempPieceList = new List<int>(board.pieceList);
                 int[] tempSquare = new int[64];
                 int tempEP = board.epFile;
@@ -525,9 +539,9 @@ public class BoardManager : MonoBehaviour
 
                 PseudoMakeMove(board, pieceIndex, move);
 
-                Board newBoard = new Board(board.epFile, board.square, board.whiteToMove, board.whiteCastleKingside, board.whiteCastleQueenside, board.blackCastleKingside, board.blackCastleQueenside);
+                //Board newBoard = new Board(board.epFile, board.square, board.whiteToMove, board.whiteCastleKingside, board.whiteCastleQueenside, board.blackCastleKingside, board.blackCastleQueenside);
 
-                numPositions += MoveGenerationTest(newBoard, depth - 1);
+                numPositions += MoveGenerationTest(board, depth - 1);
 
                 board.pieceList = tempPieceList;
                 board.square = tempSquare;

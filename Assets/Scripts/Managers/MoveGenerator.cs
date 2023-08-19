@@ -38,7 +38,13 @@ public static class MoveGenerator
 
             if (isPinned)
             {
-                pinMoveCalc.Add(pinnedDir);
+                pinMoveCalc.Add(pieceIndex + pinnedDir);
+                pinMoveCalc.Add(pieceIndex - pinnedDir);
+
+                if (pinnedDir == 8)
+                {
+                    pinMoveCalc.Add(pieceIndex + 2 * pinnedDir);
+                }
 
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
             }
@@ -58,6 +64,11 @@ public static class MoveGenerator
 
             if (isPinned)
             {
+                bool canMove = true;
+
+                if (pinnedDir == 1 || pinnedDir == 8)
+                    canMove = false;
+                
                 int posPinnedDir = pinnedDir;
                 int negPinnedDir = -1 * posPinnedDir;
                 int posIterator = posPinnedDir;
@@ -65,13 +76,13 @@ public static class MoveGenerator
                 int posSquare = posPinnedDir + pieceIndex;
                 int negSquare = negPinnedDir + pieceIndex;
 
-                while (posSquare <= 63)
+                while (posSquare <= 63 && canMove)
                 {
                     pinMoveCalc.Add(posSquare);
                     posSquare += posIterator;
                 }
 
-                while (negSquare >= 0)
+                while (negSquare >= 0 && canMove)
                 {
                     pinMoveCalc.Add(negSquare);
                     negSquare -= posIterator;
@@ -87,6 +98,11 @@ public static class MoveGenerator
 
             if (isPinned)
             {
+                bool canMove = true;
+
+                if (pinnedDir == 7 || pinnedDir == 9)
+                    canMove = false;
+                
                 int posPinnedDir = pinnedDir;
                 int negPinnedDir = -1 * posPinnedDir;
                 int posIterator = posPinnedDir;
@@ -94,16 +110,26 @@ public static class MoveGenerator
                 int posSquare = posPinnedDir + pieceIndex;
                 int negSquare = negPinnedDir + pieceIndex;
 
-                while (posSquare <= 63)
+                while (posSquare <= 63 && canMove)
                 {
                     pinMoveCalc.Add(posSquare);
                     posSquare += posIterator;
+
+                    if (IsEnemySquare(board, posSquare, pieceColor) || !IsSquareFree(board, posSquare))
+                    {
+                        break;
+                    }
                 }
 
-                while (negSquare >= 0)
+                while (negSquare >= 0 && canMove)
                 {
                     pinMoveCalc.Add(negSquare);
                     negSquare -= posIterator;
+
+                    if (IsEnemySquare(board, negSquare, pieceColor) || !IsSquareFree(board, negSquare))
+                    {
+                        break;
+                    }
                 }
 
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
@@ -127,12 +153,22 @@ public static class MoveGenerator
                 {
                     pinMoveCalc.Add(posSquare);
                     posSquare += posIterator;
+
+                    if (IsEnemySquare(board, posSquare, pieceColor) || !IsSquareFree(board, posSquare))
+                    {
+                        break;
+                    }
                 }
 
                 while (negSquare >= 0)
                 {
                     pinMoveCalc.Add(negSquare);
                     negSquare -= posIterator;
+
+                    if (IsEnemySquare(board, negSquare, pieceColor) || !IsSquareFree(board, negSquare))
+                    {
+                        break;
+                    }
                 }
 
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
