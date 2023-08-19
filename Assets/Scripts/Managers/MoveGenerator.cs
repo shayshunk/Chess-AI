@@ -6,42 +6,11 @@ using UnityEngine;
 
 public static class MoveGenerator
 {
-    private static bool _inCheck, _causesCheck;
+    private static bool _inCheck;
     static List<int> allowedSquares, attackedSquares;
-
-    public static bool CausesCheck(Board board, int piece, int pieceIndex)
-    {
-        int pieceType = Piece.PieceType(piece);
-
-        GenerateCheck.Reset();
-
-        if (pieceType == Piece.Pawn)
-        {
-            _causesCheck = GenerateCheck.GeneratePawnCheck(board, piece, pieceIndex);
-        }
-        else if (pieceType == Piece.Bishop)
-        {
-            _causesCheck = GenerateCheck.GenerateBishopCheck(board, piece, pieceIndex);
-        }
-        else if (pieceType == Piece.Rook)
-        {
-            _causesCheck = GenerateCheck.GenerateRookCheck(board, piece, pieceIndex);
-        }
-        else if (pieceType == Piece.Queen)
-        {
-            _causesCheck = GenerateCheck.GenerateQueenCheck(board, piece, pieceIndex);
-        }
-        else if (pieceType == Piece.Knight)
-        {
-            _causesCheck = GenerateCheck.GenerateKnightCheck(board, piece, pieceIndex);
-        }
-
-        return _causesCheck;
-    }
 
     public static List<int> GenerateLegal(Board board, int pieceIndex, bool check)
     {
-        //_causesCheck = false;
         _inCheck = check;
 
         bool isPinned = false;
