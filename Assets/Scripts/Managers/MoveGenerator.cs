@@ -9,7 +9,7 @@ public static class MoveGenerator
     private static bool _inCheck, _causesCheck;
     static List<int> allowedSquares, attackedSquares;
 
-    public static bool CausesCheck(int piece, int pieceIndex)
+    public static bool CausesCheck(Board board, int piece, int pieceIndex)
     {
         int pieceType = Piece.PieceType(piece);
 
@@ -17,29 +17,29 @@ public static class MoveGenerator
 
         if (pieceType == Piece.Pawn)
         {
-            _causesCheck = GenerateCheck.GeneratePawnCheck(piece, pieceIndex);
+            _causesCheck = GenerateCheck.GeneratePawnCheck(board, piece, pieceIndex);
         }
         else if (pieceType == Piece.Bishop)
         {
-            _causesCheck = GenerateCheck.GenerateBishopCheck(piece, pieceIndex);
+            _causesCheck = GenerateCheck.GenerateBishopCheck(board, piece, pieceIndex);
         }
         else if (pieceType == Piece.Rook)
         {
-            _causesCheck = GenerateCheck.GenerateRookCheck(piece, pieceIndex);
+            _causesCheck = GenerateCheck.GenerateRookCheck(board, piece, pieceIndex);
         }
         else if (pieceType == Piece.Queen)
         {
-            _causesCheck = GenerateCheck.GenerateQueenCheck(piece, pieceIndex);
+            _causesCheck = GenerateCheck.GenerateQueenCheck(board, piece, pieceIndex);
         }
         else if (pieceType == Piece.Knight)
         {
-            _causesCheck = GenerateCheck.GenerateKnightCheck(piece, pieceIndex);
+            _causesCheck = GenerateCheck.GenerateKnightCheck(board, piece, pieceIndex);
         }
 
         return _causesCheck;
     }
 
-    public static List<int> GenerateLegal(int pieceIndex, bool check)
+    public static List<int> GenerateLegal(Board board, int pieceIndex, bool check)
     {
         //_causesCheck = false;
         _inCheck = check;
@@ -51,21 +51,20 @@ public static class MoveGenerator
         attackedSquares = new List<int>();
         List<int> pinMoveCalc = new List<int>();
 
-        int piece = BoardManager.Instance.square[pieceIndex];
+        int piece = board.square[pieceIndex];
         int pieceType = Piece.PieceType(piece);
         int pieceColor = Piece.Color(piece);
 
-        if (BoardManager.Instance.pinnedPieces.Contains(pieceIndex))
+        if (board.pinnedPieces.Contains(pieceIndex))
         {
             isPinned = true;
-            int pinIndex = BoardManager.Instance.pinnedPieces.IndexOf(pieceIndex);
-            pinnedDir = BoardManager.Instance.pinnedDirection[pinIndex];
-            Debug.Log("We have a pin!");
+            int pinIndex = board.pinnedPieces.IndexOf(pieceIndex);
+            pinnedDir = board.pinnedDirection[pinIndex];
         }
 
         if (pieceType == Piece.Pawn)
         {
-            allowedSquares = GeneratePseudoLegal.GeneratePawnPseudoLegal(pieceIndex, pieceColor);
+            allowedSquares = GeneratePseudoLegal.GeneratePawnPseudoLegal(board, pieceIndex, pieceColor);
             attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
@@ -78,14 +77,14 @@ public static class MoveGenerator
         else if (pieceType == Piece.King)
         {
             List<int> tempSquares = new List<int>();
-            tempSquares = GeneratePseudoLegal.GenerateKingPseudoLegal(pieceIndex, pieceColor);
+            tempSquares = GeneratePseudoLegal.GenerateKingPseudoLegal(board, pieceIndex, pieceColor);
             attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
             
-            allowedSquares = tempSquares.Except(BoardManager.Instance.attackedSquares).ToList();
+            allowedSquares = tempSquares.Except(board.attackedSquares).ToList();
         }
         else if (pieceType == Piece.Bishop)
         {
-            allowedSquares = GeneratePseudoLegal.GenerateBishopPseudoLegal(pieceIndex, pieceColor);
+            allowedSquares = GeneratePseudoLegal.GenerateBishopPseudoLegal(board, pieceIndex, pieceColor);
             attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
@@ -114,7 +113,7 @@ public static class MoveGenerator
         }
         else if (pieceType == Piece.Rook)
         {
-            allowedSquares = GeneratePseudoLegal.GenerateRookPseudoLegal(pieceIndex, pieceColor);
+            allowedSquares = GeneratePseudoLegal.GenerateRookPseudoLegal(board, pieceIndex, pieceColor);
             attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
@@ -143,7 +142,7 @@ public static class MoveGenerator
         }
         else if (pieceType == Piece.Queen)
         {
-            allowedSquares = GeneratePseudoLegal.GenerateQueenPseudoLegal(pieceIndex, pieceColor);
+            allowedSquares = GeneratePseudoLegal.GenerateQueenPseudoLegal(board, pieceIndex, pieceColor);
             attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
@@ -172,7 +171,7 @@ public static class MoveGenerator
         }
         else if (pieceType == Piece.Knight)
         {
-            allowedSquares = GeneratePseudoLegal.GenerateKnightPseudoLegal(pieceIndex, pieceColor);
+            allowedSquares = GeneratePseudoLegal.GenerateKnightPseudoLegal(board, pieceIndex, pieceColor);
             attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
@@ -208,31 +207,31 @@ public static class MoveGenerator
         return attackedSquares;
     }
 
-    public static bool IsSquareFree(int squareIndex)
+    public static bool IsSquareFree(Board board, int squareIndex)
     {
         if (squareIndex > 63 || squareIndex < 0)
             return false;
 
-        if (BoardManager.Instance.square[squareIndex] == 0)
+        if (board.square[squareIndex] == 0)
             return true;
         else
             return false;        
     }
 
-    public static bool IsEnemySquare(int squareIndex, int pieceColor)
+    public static bool IsEnemySquare(Board board, int squareIndex, int pieceColor)
     {
         if (squareIndex > 63 || squareIndex < 0)
             return false;
         
         if (pieceColor == Piece.White)
         {
-            if (Piece.IsColor(BoardManager.Instance.square[squareIndex], Piece.Black))
+            if (Piece.IsColor(board.square[squareIndex], Piece.Black))
                 return true;
             else
                 return false;
         } else
         {
-            if (Piece.IsColor(BoardManager.Instance.square[squareIndex], Piece.White))
+            if (Piece.IsColor(board.square[squareIndex], Piece.White))
                 return true;
             else
                 return false;

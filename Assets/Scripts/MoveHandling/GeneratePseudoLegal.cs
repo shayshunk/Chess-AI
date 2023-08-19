@@ -12,7 +12,7 @@ public static class GeneratePseudoLegal
         _attackedSquares = new List<int>();
     }
 
-    public static List<int> GeneratePawnPseudoLegal(int pieceIndex, int pieceColor)
+    public static List<int> GeneratePawnPseudoLegal(Board board, int pieceIndex, int pieceColor)
     {
         ResetLists();
         
@@ -22,41 +22,33 @@ public static class GeneratePseudoLegal
         if (pieceColor == Piece.White)
         {
             int squareUp = pieceIndex + 8;
-            bool moveOne = MoveGenerator.IsSquareFree(squareUp);
+            bool moveOne = MoveGenerator.IsSquareFree(board, squareUp);
 
-            if (file == BoardManager.Instance.epFile - 1)
+            if (file == board.epFile - 1)
             {
-                Debug.Log("Checking for EP at file: " + file);
                 if (rank == 4)
-                {
-                    Debug.Log("Correct rank for EP.");
-
-                    foreach (int square in _allowedSquares)
-                    {
-                        Debug.Log("Pawn can move to: " + square);
-                    }
-                    
+                {                    
                     int squareRight = pieceIndex + 1;
-                    int pieceRight = BoardManager.Instance.square[squareRight];
+                    int pieceRight = board.square[squareRight];
                     int pieceRightType = Piece.PieceType(pieceRight);
                     int pieceRightColor = Piece.Color(pieceRight);
 
                     int[] tempSquares = new int[64];
-                    bool tempCheck = BoardManager.Instance.currentPlayerInCheck;
-                    int piece = BoardManager.Instance.square[pieceIndex];
+                    bool tempCheck = board.currentPlayerInCheck;
+                    int piece = board.square[pieceIndex];
 
-                    BoardManager.Instance.square.CopyTo(tempSquares, 0);
+                    board.square.CopyTo(tempSquares, 0);
 
-                    BoardManager.Instance.square[pieceIndex + 9] = piece;
-                    BoardManager.Instance.square[pieceIndex] = 0;
-                    BoardManager.Instance.square[squareRight] = 0;
+                    board.square[pieceIndex + 9] = piece;
+                    board.square[pieceIndex] = 0;
+                    board.square[squareRight] = 0;
 
-                    BoardManager.Instance.GenerateAllAttackedSquares();
-                    BoardManager.Instance.IsInCheck();
+                    board.GenerateAllAttackedSquares();
+                    board.IsInCheck();
 
                     ResetLists();
 
-                    if (!BoardManager.Instance.currentPlayerInCheck)
+                    if (!board.currentPlayerInCheck)
                     {
                         if (pieceRightType == Piece.Pawn && pieceRightColor == Piece.Black)
                         {
@@ -64,35 +56,35 @@ public static class GeneratePseudoLegal
                         }
                     }
 
-                    BoardManager.Instance.currentPlayerInCheck = tempCheck;
-                    tempSquares.CopyTo(BoardManager.Instance.square, 0);
+                    board.currentPlayerInCheck = tempCheck;
+                    tempSquares.CopyTo(board.square, 0);
                 }
             }
-            else if (file == BoardManager.Instance.epFile + 1)
+            else if (file == board.epFile + 1)
             {
                 if (rank == 4)
                 {
                     int squareLeft = pieceIndex - 1;
-                    int pieceLeft = BoardManager.Instance.square[squareLeft];
+                    int pieceLeft = board.square[squareLeft];
                     int pieceLeftType = Piece.PieceType(pieceLeft);
                     int pieceLeftColor = Piece.Color(pieceLeft);
 
                     int[] tempSquares = new int[64];
-                    bool tempCheck = BoardManager.Instance.currentPlayerInCheck;
-                    int piece = BoardManager.Instance.square[pieceIndex];
+                    bool tempCheck = board.currentPlayerInCheck;
+                    int piece = board.square[pieceIndex];
 
-                    BoardManager.Instance.square.CopyTo(tempSquares, 0);
+                    board.square.CopyTo(tempSquares, 0);
 
-                    BoardManager.Instance.square[pieceIndex + 7] = piece;
-                    BoardManager.Instance.square[pieceIndex] = 0;
-                    BoardManager.Instance.square[squareLeft] = 0;
+                    board.square[pieceIndex + 7] = piece;
+                    board.square[pieceIndex] = 0;
+                    board.square[squareLeft] = 0;
 
-                    BoardManager.Instance.GenerateAllAttackedSquares();
-                    BoardManager.Instance.IsInCheck();
+                    board.GenerateAllAttackedSquares();
+                    board.IsInCheck();
 
                     ResetLists();
 
-                    if (!BoardManager.Instance.currentPlayerInCheck)
+                    if (!board.currentPlayerInCheck)
                     {
                         if (pieceLeftType == Piece.Pawn && pieceLeftColor == Piece.Black)
                         {
@@ -100,8 +92,8 @@ public static class GeneratePseudoLegal
                         }
                     }
 
-                    BoardManager.Instance.currentPlayerInCheck = tempCheck;
-                    tempSquares.CopyTo(BoardManager.Instance.square, 0);
+                    board.currentPlayerInCheck = tempCheck;
+                    tempSquares.CopyTo(board.square, 0);
                 }
             }
             if (moveOne)
@@ -111,7 +103,7 @@ public static class GeneratePseudoLegal
             if (rank == 1)
             {
                 int squareUpTwo = pieceIndex + 16;
-                bool moveTwo = MoveGenerator.IsSquareFree(squareUpTwo);
+                bool moveTwo = MoveGenerator.IsSquareFree(board, squareUpTwo);
                 if (moveTwo)
                 {
                     _allowedSquares.Add(squareUpTwo);
@@ -121,7 +113,7 @@ public static class GeneratePseudoLegal
             {
                 int squareUpLeft = pieceIndex + 7;
                 _attackedSquares.Add(squareUpLeft);
-                if (MoveGenerator.IsEnemySquare(squareUpLeft, pieceColor))
+                if (MoveGenerator.IsEnemySquare(board, squareUpLeft, pieceColor))
                 {
                     _allowedSquares.Add(squareUpLeft);
                 }
@@ -131,38 +123,38 @@ public static class GeneratePseudoLegal
             {
                 int squareUpRight = pieceIndex + 9;
                 _attackedSquares.Add(squareUpRight);
-                if (MoveGenerator.IsEnemySquare(squareUpRight, pieceColor))
+                if (MoveGenerator.IsEnemySquare(board, squareUpRight, pieceColor))
                 {
                     _allowedSquares.Add(squareUpRight);
                 }
             }
         } else
         {
-            if (file == BoardManager.Instance.epFile - 1)
+            if (file == board.epFile - 1)
             {
                 if (rank == 3)
                 {
                     int squareRight = pieceIndex + 1;
-                    int pieceRight = BoardManager.Instance.square[squareRight];
+                    int pieceRight = board.square[squareRight];
                     int pieceRightType = Piece.PieceType(pieceRight);
                     int pieceRightColor = Piece.Color(pieceRight);
 
                     int[] tempSquares = new int[64];
-                    bool tempCheck = BoardManager.Instance.currentPlayerInCheck;
-                    int piece = BoardManager.Instance.square[pieceIndex];
+                    bool tempCheck = board.currentPlayerInCheck;
+                    int piece = board.square[pieceIndex];
 
-                    BoardManager.Instance.square.CopyTo(tempSquares, 0);
+                    board.square.CopyTo(tempSquares, 0);
 
-                    BoardManager.Instance.square[pieceIndex - 7] = piece;
-                    BoardManager.Instance.square[pieceIndex] = 0;
-                    BoardManager.Instance.square[squareRight] = 0;
+                    board.square[pieceIndex - 7] = piece;
+                    board.square[pieceIndex] = 0;
+                    board.square[squareRight] = 0;
 
-                    BoardManager.Instance.GenerateAllAttackedSquares();
-                    BoardManager.Instance.IsInCheck();
+                    board.GenerateAllAttackedSquares();
+                    board.IsInCheck();
 
                     ResetLists();
 
-                    if (!BoardManager.Instance.currentPlayerInCheck)
+                    if (!board.currentPlayerInCheck)
                     {
                         if (pieceRightType == Piece.Pawn && pieceRightColor == Piece.White)
                         {
@@ -170,35 +162,35 @@ public static class GeneratePseudoLegal
                         }
                     }
 
-                    BoardManager.Instance.currentPlayerInCheck = tempCheck;
-                    tempSquares.CopyTo(BoardManager.Instance.square, 0);
+                    board.currentPlayerInCheck = tempCheck;
+                    tempSquares.CopyTo(board.square, 0);
                 }
             }
-            else if (file == BoardManager.Instance.epFile + 1)
+            else if (file == board.epFile + 1)
             {
                 if (rank == 3)
                 {
                     int squareLeft = pieceIndex - 1;
-                    int pieceLeft = BoardManager.Instance.square[squareLeft];
+                    int pieceLeft = board.square[squareLeft];
                     int pieceLeftType = Piece.PieceType(pieceLeft);
                     int pieceLeftColor = Piece.Color(pieceLeft);
 
                     int[] tempSquares = new int[64];
-                    bool tempCheck = BoardManager.Instance.currentPlayerInCheck;
-                    int piece = BoardManager.Instance.square[pieceIndex];
+                    bool tempCheck = board.currentPlayerInCheck;
+                    int piece = board.square[pieceIndex];
 
-                    BoardManager.Instance.square.CopyTo(tempSquares, 0);
+                    board.square.CopyTo(tempSquares, 0);
 
-                    BoardManager.Instance.square[pieceIndex - 9] = piece;
-                    BoardManager.Instance.square[pieceIndex] = 0;
-                    BoardManager.Instance.square[squareLeft] = 0;
+                    board.square[pieceIndex - 9] = piece;
+                    board.square[pieceIndex] = 0;
+                    board.square[squareLeft] = 0;
 
-                    BoardManager.Instance.GenerateAllAttackedSquares();
-                    BoardManager.Instance.IsInCheck();
+                    board.GenerateAllAttackedSquares();
+                    board.IsInCheck();
 
                     ResetLists();
 
-                    if (!BoardManager.Instance.currentPlayerInCheck)
+                    if (!board.currentPlayerInCheck)
                     {
                         if (pieceLeftType == Piece.Pawn && pieceLeftColor == Piece.White)
                         {
@@ -206,12 +198,12 @@ public static class GeneratePseudoLegal
                         }
                     }
 
-                    BoardManager.Instance.currentPlayerInCheck = tempCheck;
-                    tempSquares.CopyTo(BoardManager.Instance.square, 0);
+                    board.currentPlayerInCheck = tempCheck;
+                    tempSquares.CopyTo(board.square, 0);
                 }
             }
 
-            bool moveOne = MoveGenerator.IsSquareFree(pieceIndex - 8);
+            bool moveOne = MoveGenerator.IsSquareFree(board, pieceIndex - 8);
             if (moveOne)
             {
                 _allowedSquares.Add(pieceIndex - 8);
@@ -219,7 +211,7 @@ public static class GeneratePseudoLegal
             
             if (rank == 6)
             {
-                bool moveTwo = MoveGenerator.IsSquareFree(pieceIndex - 16);
+                bool moveTwo = MoveGenerator.IsSquareFree(board, pieceIndex - 16);
                 if (moveTwo)
                 {
                     _allowedSquares.Add(pieceIndex - 16);
@@ -230,7 +222,7 @@ public static class GeneratePseudoLegal
             {
                 int squareDownRight = pieceIndex - 7;
                 _attackedSquares.Add(squareDownRight);
-                if (MoveGenerator.IsEnemySquare(squareDownRight, pieceColor))
+                if (MoveGenerator.IsEnemySquare(board, squareDownRight, pieceColor))
                 {
                     _allowedSquares.Add(squareDownRight);
                 }
@@ -240,7 +232,7 @@ public static class GeneratePseudoLegal
             {
                 int squareDownLeft = pieceIndex - 9;
                 _attackedSquares.Add(squareDownLeft);
-                if (MoveGenerator.IsEnemySquare(squareDownLeft, pieceColor))
+                if (MoveGenerator.IsEnemySquare(board, squareDownLeft, pieceColor))
                 {
                     _allowedSquares.Add(squareDownLeft);
                 }
@@ -250,7 +242,7 @@ public static class GeneratePseudoLegal
         return _allowedSquares;
     }
 
-    public static List<int> GenerateKingPseudoLegal(int pieceIndex, int pieceColor)
+    public static List<int> GenerateKingPseudoLegal(Board board, int pieceIndex, int pieceColor)
     {
         ResetLists();
 
@@ -261,18 +253,18 @@ public static class GeneratePseudoLegal
 
         if (rank != 7)
         {
-            moveUp = MoveGenerator.IsSquareFree(pieceIndex + 8) || MoveGenerator.IsEnemySquare(pieceIndex + 8, pieceColor);
+            moveUp = MoveGenerator.IsSquareFree(board, pieceIndex + 8) || MoveGenerator.IsEnemySquare(board, pieceIndex + 8, pieceColor);
             _attackedSquares.Add(pieceIndex + 8);
             
             if (file != 7)
             {
-                moveUpRight = MoveGenerator.IsSquareFree(pieceIndex + 9) || MoveGenerator.IsEnemySquare(pieceIndex + 9, pieceColor);
+                moveUpRight = MoveGenerator.IsSquareFree(board, pieceIndex + 9) || MoveGenerator.IsEnemySquare(board, pieceIndex + 9, pieceColor);
                 _attackedSquares.Add(pieceIndex + 9);
             }
                 
             if (file != 0)
             {
-                moveUpLeft = MoveGenerator.IsSquareFree(pieceIndex + 7) || MoveGenerator.IsEnemySquare(pieceIndex + 7, pieceColor);
+                moveUpLeft = MoveGenerator.IsSquareFree(board, pieceIndex + 7) || MoveGenerator.IsEnemySquare(board, pieceIndex + 7, pieceColor);
                 _attackedSquares.Add(pieceIndex + 7);
             }
                 
@@ -286,17 +278,17 @@ public static class GeneratePseudoLegal
         }
         if (rank != 0)
         {
-            moveDown = MoveGenerator.IsSquareFree(pieceIndex - 8) || MoveGenerator.IsEnemySquare(pieceIndex - 8, pieceColor);
+            moveDown = MoveGenerator.IsSquareFree(board, pieceIndex - 8) || MoveGenerator.IsEnemySquare(board, pieceIndex - 8, pieceColor);
             _attackedSquares.Add(pieceIndex - 8);
 
             if (file != 7)
             {
-                moveDownRight = MoveGenerator.IsSquareFree(pieceIndex - 7) || MoveGenerator.IsEnemySquare(pieceIndex - 7, pieceColor);
+                moveDownRight = MoveGenerator.IsSquareFree(board, pieceIndex - 7) || MoveGenerator.IsEnemySquare(board, pieceIndex - 7, pieceColor);
                 _attackedSquares.Add(pieceIndex - 7);
             }
             if (file != 0)
             {
-                moveDownLeft = MoveGenerator.IsSquareFree(pieceIndex - 9) || MoveGenerator.IsEnemySquare(pieceIndex - 9, pieceColor);
+                moveDownLeft = MoveGenerator.IsSquareFree(board, pieceIndex - 9) || MoveGenerator.IsEnemySquare(board, pieceIndex - 9, pieceColor);
                 _attackedSquares.Add(pieceIndex - 9);
             }
             
@@ -309,7 +301,7 @@ public static class GeneratePseudoLegal
         }
         if (file != 0)
         {
-            moveLeft = MoveGenerator.IsSquareFree(pieceIndex - 1) || MoveGenerator.IsEnemySquare(pieceIndex - 1, pieceColor);
+            moveLeft = MoveGenerator.IsSquareFree(board, pieceIndex - 1) || MoveGenerator.IsEnemySquare(board, pieceIndex - 1, pieceColor);
             _attackedSquares.Add(pieceIndex - 1);
 
             if (moveLeft)
@@ -317,7 +309,7 @@ public static class GeneratePseudoLegal
         }
         if (file != 7)
         {
-            moveRight = MoveGenerator.IsSquareFree(pieceIndex + 1) || MoveGenerator.IsEnemySquare(pieceIndex + 1, pieceColor);
+            moveRight = MoveGenerator.IsSquareFree(board, pieceIndex + 1) || MoveGenerator.IsEnemySquare(board, pieceIndex + 1, pieceColor);
             _attackedSquares.Add(pieceIndex + 1);
 
             if (moveRight)
@@ -326,11 +318,11 @@ public static class GeneratePseudoLegal
 
         if (pieceColor == Piece.White)
         {
-            if (BoardManager.Instance.whiteCastleKingside)
+            if (board.whiteCastleKingside)
             {
-                bool castleKingSide = moveRight && MoveGenerator.IsSquareFree(pieceIndex + 2);
+                bool castleKingSide = moveRight && MoveGenerator.IsSquareFree(board, pieceIndex + 2);
 
-                if (BoardManager.Instance.attackedSquares.Contains(pieceIndex + 1) || BoardManager.Instance.attackedSquares.Contains(pieceIndex + 2))
+                if (board.attackedSquares.Contains(pieceIndex + 1) || board.attackedSquares.Contains(pieceIndex + 2))
                     castleKingSide = false;
 
                 if (castleKingSide)
@@ -338,11 +330,11 @@ public static class GeneratePseudoLegal
                     _allowedSquares.Add(pieceIndex + 2);
                 }
             }
-            if (BoardManager.Instance.whiteCastleQueenside)
+            if (board.whiteCastleQueenside)
             {
-                bool castleQueenSide = moveLeft && MoveGenerator.IsSquareFree(pieceIndex - 2);
+                bool castleQueenSide = moveLeft && MoveGenerator.IsSquareFree(board, pieceIndex - 2);
 
-                if (BoardManager.Instance.attackedSquares.Contains(pieceIndex - 1) || BoardManager.Instance.attackedSquares.Contains(pieceIndex - 2))
+                if (board.attackedSquares.Contains(pieceIndex - 1) || board.attackedSquares.Contains(pieceIndex - 2))
                     castleQueenSide = false;
 
                 if (castleQueenSide)
@@ -353,11 +345,11 @@ public static class GeneratePseudoLegal
         }
         else
         {
-            if (BoardManager.Instance.blackCastleKingside)
+            if (board.blackCastleKingside)
             {
-                bool castleKingSide = moveRight && MoveGenerator.IsSquareFree(pieceIndex + 2);
+                bool castleKingSide = moveRight && MoveGenerator.IsSquareFree(board, pieceIndex + 2);
 
-                if (BoardManager.Instance.attackedSquares.Contains(pieceIndex + 1) || BoardManager.Instance.attackedSquares.Contains(pieceIndex + 2))
+                if (board.attackedSquares.Contains(pieceIndex + 1) || board.attackedSquares.Contains(pieceIndex + 2))
                     castleKingSide = false;
 
                 if (castleKingSide)
@@ -365,11 +357,11 @@ public static class GeneratePseudoLegal
                     _allowedSquares.Add(pieceIndex + 2);
                 }
             }
-            if (BoardManager.Instance.blackCastleQueenside)
+            if (board.blackCastleQueenside)
             {
-                bool castleQueenSide = moveLeft && MoveGenerator.IsSquareFree(pieceIndex - 2);
+                bool castleQueenSide = moveLeft && MoveGenerator.IsSquareFree(board, pieceIndex - 2);
 
-                if (BoardManager.Instance.attackedSquares.Contains(pieceIndex - 1) || BoardManager.Instance.attackedSquares.Contains(pieceIndex - 2))
+                if (board.attackedSquares.Contains(pieceIndex - 1) || board.attackedSquares.Contains(pieceIndex - 2))
                     castleQueenSide = false;
                 
                 if (castleQueenSide)
@@ -382,7 +374,7 @@ public static class GeneratePseudoLegal
         return _allowedSquares;
     }
 
-    public static List<int> GenerateBishopPseudoLegal(int pieceIndex, int pieceColor)
+    public static List<int> GenerateBishopPseudoLegal(Board board, int pieceIndex, int pieceColor)
     {
         _allowedSquares = new List<int>();
         _attackedSquares = new List<int>();
@@ -402,8 +394,8 @@ public static class GeneratePseudoLegal
             if (squareUpRight % 8 == 0)
                 break;
             
-            moveUpRight = MoveGenerator.IsSquareFree(squareUpRight);
-            enemyUpRight = MoveGenerator.IsEnemySquare(squareUpRight, pieceColor);
+            moveUpRight = MoveGenerator.IsSquareFree(board, squareUpRight);
+            enemyUpRight = MoveGenerator.IsEnemySquare(board, squareUpRight, pieceColor);
             
             if (moveUpRight || enemyUpRight)
             {
@@ -427,8 +419,8 @@ public static class GeneratePseudoLegal
             if (squareUpLeft % 8 == 7)
                 break;
             
-            moveUpLeft = MoveGenerator.IsSquareFree(squareUpLeft);
-            enemyUpLeft = MoveGenerator.IsEnemySquare(squareUpLeft, pieceColor);
+            moveUpLeft = MoveGenerator.IsSquareFree(board, squareUpLeft);
+            enemyUpLeft = MoveGenerator.IsEnemySquare(board, squareUpLeft, pieceColor);
             
             if (moveUpLeft || enemyUpLeft)
             {
@@ -450,8 +442,8 @@ public static class GeneratePseudoLegal
             if (squareDownRight % 8 == 0)
                 break;
             
-            moveDownRight = MoveGenerator.IsSquareFree(squareDownRight);
-            enemyDownRight = MoveGenerator.IsEnemySquare(squareDownRight, pieceColor);
+            moveDownRight = MoveGenerator.IsSquareFree(board, squareDownRight);
+            enemyDownRight = MoveGenerator.IsEnemySquare(board, squareDownRight, pieceColor);
 
             if (moveDownRight || enemyDownRight)
             {
@@ -473,8 +465,8 @@ public static class GeneratePseudoLegal
             if (squareDownLeft % 8 == 7)
                 break;
             
-            moveDownLeft = MoveGenerator.IsSquareFree(squareDownLeft);
-            enemyDownLeft = MoveGenerator.IsEnemySquare(squareDownLeft, pieceColor);
+            moveDownLeft = MoveGenerator.IsSquareFree(board, squareDownLeft);
+            enemyDownLeft = MoveGenerator.IsEnemySquare(board, squareDownLeft, pieceColor);
 
             if (moveDownLeft || enemyDownLeft)
             {
@@ -495,7 +487,7 @@ public static class GeneratePseudoLegal
         return _allowedSquares;
     }
 
-    public static List<int> GenerateRookPseudoLegal(int pieceIndex, int pieceColor)
+    public static List<int> GenerateRookPseudoLegal(Board board, int pieceIndex, int pieceColor)
     {
         _allowedSquares = new List<int>();
         _attackedSquares = new List<int>();
@@ -515,8 +507,8 @@ public static class GeneratePseudoLegal
             if (squareUp / 8 == 8)
                 break;
             
-            moveUp = MoveGenerator.IsSquareFree(squareUp);
-            enemyUp = MoveGenerator.IsEnemySquare(squareUp, pieceColor);
+            moveUp = MoveGenerator.IsSquareFree(board, squareUp);
+            enemyUp = MoveGenerator.IsEnemySquare(board, squareUp, pieceColor);
             
             if (moveUp || enemyUp)
             {
@@ -538,8 +530,8 @@ public static class GeneratePseudoLegal
             if (squareLeft % 8 == 7)
                 break;
             
-            moveLeft = MoveGenerator.IsSquareFree(squareLeft);
-            enemyLeft = MoveGenerator.IsEnemySquare(squareLeft, pieceColor);
+            moveLeft = MoveGenerator.IsSquareFree(board, squareLeft);
+            enemyLeft = MoveGenerator.IsEnemySquare(board, squareLeft, pieceColor);
             
             if (moveLeft || enemyLeft)
             {
@@ -561,8 +553,8 @@ public static class GeneratePseudoLegal
             if (squareRight % 8 == 0)
                 break;
             
-            moveRight = MoveGenerator.IsSquareFree(squareRight);
-            enemyRight = MoveGenerator.IsEnemySquare(squareRight, pieceColor);
+            moveRight = MoveGenerator.IsSquareFree(board, squareRight);
+            enemyRight = MoveGenerator.IsEnemySquare(board, squareRight, pieceColor);
 
             if (moveRight || enemyRight)
             {
@@ -581,8 +573,8 @@ public static class GeneratePseudoLegal
         }
         while (squareDown >= 0)
         {            
-            moveDown = MoveGenerator.IsSquareFree(squareDown);
-            enemyDown = MoveGenerator.IsEnemySquare(squareDown, pieceColor);
+            moveDown = MoveGenerator.IsSquareFree(board, squareDown);
+            enemyDown = MoveGenerator.IsEnemySquare(board, squareDown, pieceColor);
 
             if (moveDown || enemyDown)
             {
@@ -603,7 +595,7 @@ public static class GeneratePseudoLegal
         return _allowedSquares;
     }
 
-    public static List<int> GenerateQueenPseudoLegal(int pieceIndex, int pieceColor)
+    public static List<int> GenerateQueenPseudoLegal(Board board, int pieceIndex, int pieceColor)
     {
         _allowedSquares = new List<int>();
         _attackedSquares = new List<int>();
@@ -631,8 +623,8 @@ public static class GeneratePseudoLegal
             if (squareUp / 8 == 8)
                 break;
             
-            moveUp = MoveGenerator.IsSquareFree(squareUp);
-            enemyUp = MoveGenerator.IsEnemySquare(squareUp, pieceColor);
+            moveUp = MoveGenerator.IsSquareFree(board, squareUp);
+            enemyUp = MoveGenerator.IsEnemySquare(board, squareUp, pieceColor);
             
             if (moveUp || enemyUp)
             {
@@ -654,8 +646,8 @@ public static class GeneratePseudoLegal
             if (squareLeft % 8 == 7)
                 break;
             
-            moveLeft = MoveGenerator.IsSquareFree(squareLeft);
-            enemyLeft = MoveGenerator.IsEnemySquare(squareLeft, pieceColor);
+            moveLeft = MoveGenerator.IsSquareFree(board, squareLeft);
+            enemyLeft = MoveGenerator.IsEnemySquare(board, squareLeft, pieceColor);
             
             if (moveLeft || enemyLeft)
             {
@@ -677,8 +669,8 @@ public static class GeneratePseudoLegal
             if (squareRight % 8 == 0)
                 break;
             
-            moveRight = MoveGenerator.IsSquareFree(squareRight);
-            enemyRight = MoveGenerator.IsEnemySquare(squareRight, pieceColor);
+            moveRight = MoveGenerator.IsSquareFree(board, squareRight);
+            enemyRight = MoveGenerator.IsEnemySquare(board, squareRight, pieceColor);
 
             if (moveRight || enemyRight)
             {
@@ -697,8 +689,8 @@ public static class GeneratePseudoLegal
         }
         while (squareDown >= 0)
         {            
-            moveDown = MoveGenerator.IsSquareFree(squareDown);
-            enemyDown = MoveGenerator.IsEnemySquare(squareDown, pieceColor);
+            moveDown = MoveGenerator.IsSquareFree(board, squareDown);
+            enemyDown = MoveGenerator.IsEnemySquare(board, squareDown, pieceColor);
 
             if (moveDown || enemyDown)
             {
@@ -720,8 +712,8 @@ public static class GeneratePseudoLegal
             if (squareUpRight % 8 == 0)
                 break;
             
-            moveUpRight = MoveGenerator.IsSquareFree(squareUpRight);
-            enemyUpRight = MoveGenerator.IsEnemySquare(squareUpRight, pieceColor);
+            moveUpRight = MoveGenerator.IsSquareFree(board, squareUpRight);
+            enemyUpRight = MoveGenerator.IsEnemySquare(board, squareUpRight, pieceColor);
             
             if (moveUpRight || enemyUpRight)
             {
@@ -743,8 +735,8 @@ public static class GeneratePseudoLegal
             if (squareUpLeft % 8 == 7)
                 break;
             
-            moveUpLeft = MoveGenerator.IsSquareFree(squareUpLeft);
-            enemyUpLeft = MoveGenerator.IsEnemySquare(squareUpLeft, pieceColor);
+            moveUpLeft = MoveGenerator.IsSquareFree(board, squareUpLeft);
+            enemyUpLeft = MoveGenerator.IsEnemySquare(board, squareUpLeft, pieceColor);
             
             if (moveUpLeft || enemyUpLeft)
             {
@@ -766,8 +758,8 @@ public static class GeneratePseudoLegal
             if (squareDownRight % 8 == 0)
                 break;
             
-            moveDownRight = MoveGenerator.IsSquareFree(squareDownRight);
-            enemyDownRight = MoveGenerator.IsEnemySquare(squareDownRight, pieceColor);
+            moveDownRight = MoveGenerator.IsSquareFree(board, squareDownRight);
+            enemyDownRight = MoveGenerator.IsEnemySquare(board, squareDownRight, pieceColor);
 
             if (moveDownRight || enemyDownRight)
             {
@@ -789,8 +781,8 @@ public static class GeneratePseudoLegal
             if (squareDownLeft % 8 == 7)
                 break;
             
-            moveDownLeft = MoveGenerator.IsSquareFree(squareDownLeft);
-            enemyDownLeft = MoveGenerator.IsEnemySquare(squareDownLeft, pieceColor);
+            moveDownLeft = MoveGenerator.IsSquareFree(board, squareDownLeft);
+            enemyDownLeft = MoveGenerator.IsEnemySquare(board, squareDownLeft, pieceColor);
 
             if (moveDownLeft || enemyDownLeft)
             {
@@ -811,7 +803,7 @@ public static class GeneratePseudoLegal
         return _allowedSquares;
     }
 
-    public static List<int> GenerateKnightPseudoLegal(int pieceIndex, int pieceColor)
+    public static List<int> GenerateKnightPseudoLegal(Board board, int pieceIndex, int pieceColor)
     {
         _allowedSquares = new List<int>();
         _attackedSquares = new List<int>();
@@ -839,8 +831,8 @@ public static class GeneratePseudoLegal
    
         if (rank < 6 && file < 7)
         {
-            moveUpUpRight = MoveGenerator.IsSquareFree(squareUpUpRight);
-            enemyUpUpRight = MoveGenerator.IsEnemySquare(squareUpUpRight, pieceColor);
+            moveUpUpRight = MoveGenerator.IsSquareFree(board, squareUpUpRight);
+            enemyUpUpRight = MoveGenerator.IsEnemySquare(board, squareUpUpRight, pieceColor);
             _attackedSquares.Add(squareUpUpRight);
 
             if (moveUpUpRight || enemyUpUpRight)
@@ -849,8 +841,8 @@ public static class GeneratePseudoLegal
         }
         if (rank < 7 && file < 6)
         {
-            moveUpRightRight = MoveGenerator.IsSquareFree(squareUpRightRight);
-            enemyUpRightRight = MoveGenerator.IsEnemySquare(squareUpRightRight, pieceColor);
+            moveUpRightRight = MoveGenerator.IsSquareFree(board, squareUpRightRight);
+            enemyUpRightRight = MoveGenerator.IsEnemySquare(board, squareUpRightRight, pieceColor);
             _attackedSquares.Add(squareUpRightRight);
 
             if (moveUpRightRight || enemyUpRightRight)
@@ -858,8 +850,8 @@ public static class GeneratePseudoLegal
         }
         if (rank < 6 && file > 0)
         {
-            moveUpUpLeft = MoveGenerator.IsSquareFree(squareUpUpLeft);
-            enemyUpUpLeft = MoveGenerator.IsEnemySquare(squareUpUpLeft, pieceColor);
+            moveUpUpLeft = MoveGenerator.IsSquareFree(board, squareUpUpLeft);
+            enemyUpUpLeft = MoveGenerator.IsEnemySquare(board, squareUpUpLeft, pieceColor);
             _attackedSquares.Add(squareUpUpLeft);
             
             if (moveUpUpLeft || enemyUpUpLeft)
@@ -867,8 +859,8 @@ public static class GeneratePseudoLegal
         }
         if (rank < 7 && file > 1)
         {
-            moveUpLeftLeft = MoveGenerator.IsSquareFree(squareUpLeftLeft);
-            enemyUpLeftLeft = MoveGenerator.IsEnemySquare(squareUpLeftLeft, pieceColor);
+            moveUpLeftLeft = MoveGenerator.IsSquareFree(board, squareUpLeftLeft);
+            enemyUpLeftLeft = MoveGenerator.IsEnemySquare(board, squareUpLeftLeft, pieceColor);
             _attackedSquares.Add(squareUpLeftLeft);
 
             if (moveUpLeftLeft || enemyUpLeftLeft)
@@ -876,8 +868,8 @@ public static class GeneratePseudoLegal
         }
         if (rank > 1 && file > 0)
         {
-            moveDownDownLeft = MoveGenerator.IsSquareFree(squareDownDownLeft);
-            enemyDownDownLeft = MoveGenerator.IsEnemySquare(squareDownDownLeft, pieceColor);
+            moveDownDownLeft = MoveGenerator.IsSquareFree(board, squareDownDownLeft);
+            enemyDownDownLeft = MoveGenerator.IsEnemySquare(board, squareDownDownLeft, pieceColor);
             _attackedSquares.Add(squareDownDownLeft);
 
             if (moveDownDownLeft || enemyDownDownLeft)
@@ -885,8 +877,8 @@ public static class GeneratePseudoLegal
         }
         if (rank > 0 && file > 1)
         {
-            moveDownLeftLeft = MoveGenerator.IsSquareFree(squareDownLeftLeft);
-            enemyDownLeftLeft = MoveGenerator.IsEnemySquare(squareDownLeftLeft, pieceColor);
+            moveDownLeftLeft = MoveGenerator.IsSquareFree(board, squareDownLeftLeft);
+            enemyDownLeftLeft = MoveGenerator.IsEnemySquare(board, squareDownLeftLeft, pieceColor);
             _attackedSquares.Add(squareDownLeftLeft);
 
             if (moveDownLeftLeft || enemyDownLeftLeft)
@@ -894,8 +886,8 @@ public static class GeneratePseudoLegal
         }
         if (rank > 1 && file < 7)
         {
-            moveDownDownRight = MoveGenerator.IsSquareFree(squareDownDownRight);
-            enemyDownDownRight = MoveGenerator.IsEnemySquare(squareDownDownRight, pieceColor);
+            moveDownDownRight = MoveGenerator.IsSquareFree(board, squareDownDownRight);
+            enemyDownDownRight = MoveGenerator.IsEnemySquare(board, squareDownDownRight, pieceColor);
             _attackedSquares.Add(squareDownDownRight);
 
             if (moveDownDownRight || enemyDownDownRight)
@@ -903,8 +895,8 @@ public static class GeneratePseudoLegal
         }
         if (rank > 0 && file < 6)
         {
-            moveDownRightRight = MoveGenerator.IsSquareFree(squareDownRightRight);
-            enemyDownRightRight = MoveGenerator.IsEnemySquare(squareDownRightRight, pieceColor);
+            moveDownRightRight = MoveGenerator.IsSquareFree(board, squareDownRightRight);
+            enemyDownRightRight = MoveGenerator.IsEnemySquare(board, squareDownRightRight, pieceColor);
             _attackedSquares.Add(squareDownRightRight);
 
             if (moveDownRightRight || enemyDownRightRight)

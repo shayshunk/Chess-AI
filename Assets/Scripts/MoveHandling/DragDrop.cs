@@ -45,24 +45,16 @@ public class DragDrop : MonoBehaviour
 
     void OnMouseDown()
     {
-        if (BoardManager.Instance.whiteToMove == Piece.IsColor(piece, Piece.White))   
+        if (BoardManager.Instance.MainBoard.whiteToMove == Piece.IsColor(piece, Piece.White))   
         {
             _dragging = true;
             _offset = GetMousePos() - (Vector2) transform.position;
 
             int pieceIndex = rank * 8 + file;
 
-            int pieceListIndex = BoardManager.Instance.pieceList.IndexOf(pieceIndex);
+            int pieceListIndex = BoardManager.Instance.MainBoard.pieceList.IndexOf(pieceIndex);
 
-            Debug.Log("Square at: " + pieceIndex);
-            Debug.Log("Piece list thinks: " + pieceListIndex);
-            
-            foreach (int index in BoardManager.Instance.pieceList)
-            {
-                Debug.Log("Piece list: " + index);
-            }
-
-            List<int> allowedSquares = BoardManager.Instance.allowedMoves[pieceListIndex];
+            List<int> allowedSquares = BoardManager.Instance.MainBoard.allowedMoves[pieceListIndex];
 
             foreach (int index in allowedSquares)
             {

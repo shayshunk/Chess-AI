@@ -7,15 +7,15 @@ public static class PinHandler
     static bool[] squaresAroundKing;
     static List<int> pinnedPieces, pinnedDirection;
     
-    public static bool[] GeneratePins()
+    public static bool[] GeneratePins(Board board)
     {
         squaresAroundKing = new bool[8];
         pinnedPieces = new List<int>();
         pinnedDirection = new List<int>();
 
-        int blackOrWhite = BoardManager.Instance.whiteToMove? 0 : 1;
-        int pieceIndex = BoardManager.Instance.kingSquares[blackOrWhite];
-        int pieceColor = BoardManager.Instance.whiteToMove? Piece.White : Piece.Black;
+        int blackOrWhite = board.whiteToMove? 0 : 1;
+        int pieceIndex = board.kingSquares[blackOrWhite];
+        int pieceColor = board.whiteToMove? Piece.White : Piece.Black;
 
         int squareUp = pieceIndex + 8;
         int squareLeft = pieceIndex - 1;
@@ -46,14 +46,14 @@ public static class PinHandler
                 break;
             }
             
-            moveUp = MoveGenerator.IsSquareFree(squareUp);
-            enemyUp = MoveGenerator.IsEnemySquare(squareUp, pieceColor);
+            moveUp = MoveGenerator.IsSquareFree(board, squareUp);
+            enemyUp = MoveGenerator.IsEnemySquare(board, squareUp, pieceColor);
             
             if (moveUp || enemyUp)
             {
                 if (foundFriendly && enemyUp)
                 {
-                    int enemyPieceType = Piece.PieceType(BoardManager.Instance.square[squareUp]);
+                    int enemyPieceType = Piece.PieceType(board.square[squareUp]);
 
                     if (enemyPieceType == Piece.Rook || enemyPieceType == Piece.Queen)
                     {
@@ -102,14 +102,14 @@ public static class PinHandler
                 break;
             }
             
-            moveLeft = MoveGenerator.IsSquareFree(squareLeft);
-            enemyLeft = MoveGenerator.IsEnemySquare(squareLeft, pieceColor);
+            moveLeft = MoveGenerator.IsSquareFree(board, squareLeft);
+            enemyLeft = MoveGenerator.IsEnemySquare(board, squareLeft, pieceColor);
             
             if (moveLeft || enemyLeft)
             {
                 if (foundFriendly && enemyLeft)
                 {
-                    int enemyPieceType = Piece.PieceType(BoardManager.Instance.square[squareLeft]);
+                    int enemyPieceType = Piece.PieceType(board.square[squareLeft]);
 
                     if (enemyPieceType == Piece.Rook || enemyPieceType == Piece.Queen)
                     {
@@ -158,14 +158,14 @@ public static class PinHandler
                 break;
             }
             
-            moveRight = MoveGenerator.IsSquareFree(squareRight);
-            enemyRight = MoveGenerator.IsEnemySquare(squareRight, pieceColor);
+            moveRight = MoveGenerator.IsSquareFree(board, squareRight);
+            enemyRight = MoveGenerator.IsEnemySquare(board, squareRight, pieceColor);
 
             if (moveRight || enemyRight)
             {
                 if (foundFriendly && enemyRight)
                 {
-                    int enemyPieceType = Piece.PieceType(BoardManager.Instance.square[squareRight]);
+                    int enemyPieceType = Piece.PieceType(board.square[squareRight]);
 
                     if (enemyPieceType == Piece.Rook || enemyPieceType == Piece.Queen)
                     {
@@ -207,14 +207,14 @@ public static class PinHandler
 
         while (squareDown >= 0)
         {            
-            moveDown = MoveGenerator.IsSquareFree(squareDown);
-            enemyDown = MoveGenerator.IsEnemySquare(squareDown, pieceColor);
+            moveDown = MoveGenerator.IsSquareFree(board, squareDown);
+            enemyDown = MoveGenerator.IsEnemySquare(board, squareDown, pieceColor);
 
             if (moveDown || enemyDown)
             {
                 if (foundFriendly && enemyDown)
                 {
-                    int enemyPieceType = Piece.PieceType(BoardManager.Instance.square[squareDown]);
+                    int enemyPieceType = Piece.PieceType(board.square[squareDown]);
 
                     if (enemyPieceType == Piece.Rook || enemyPieceType == Piece.Queen)
                     {
@@ -261,14 +261,14 @@ public static class PinHandler
                 break;
             }
             
-            moveUpRight = MoveGenerator.IsSquareFree(squareUpRight);
-            enemyUpRight = MoveGenerator.IsEnemySquare(squareUpRight, pieceColor);
+            moveUpRight = MoveGenerator.IsSquareFree(board, squareUpRight);
+            enemyUpRight = MoveGenerator.IsEnemySquare(board, squareUpRight, pieceColor);
             
             if (moveUpRight || enemyUpRight)
             {
                 if (foundFriendly && enemyUpRight)
                 {
-                    int enemyPieceType = Piece.PieceType(BoardManager.Instance.square[squareUpRight]);
+                    int enemyPieceType = Piece.PieceType(board.square[squareUpRight]);
 
                     if (enemyPieceType == Piece.Bishop || enemyPieceType == Piece.Queen)
                     {
@@ -315,14 +315,14 @@ public static class PinHandler
                 break;
             }
             
-            moveUpLeft = MoveGenerator.IsSquareFree(squareUpLeft);
-            enemyUpLeft = MoveGenerator.IsEnemySquare(squareUpLeft, pieceColor);
+            moveUpLeft = MoveGenerator.IsSquareFree(board, squareUpLeft);
+            enemyUpLeft = MoveGenerator.IsEnemySquare(board, squareUpLeft, pieceColor);
             
             if (moveUpLeft || enemyUpLeft)
             {
                 if (foundFriendly && enemyUpLeft)
                 {
-                    int enemyPieceType = Piece.PieceType(BoardManager.Instance.square[squareUpLeft]);
+                    int enemyPieceType = Piece.PieceType(board.square[squareUpLeft]);
 
                     if (enemyPieceType == Piece.Bishop || enemyPieceType == Piece.Queen)
                     {
@@ -369,14 +369,14 @@ public static class PinHandler
                 break;
             }
             
-            moveDownRight = MoveGenerator.IsSquareFree(squareDownRight);
-            enemyDownRight = MoveGenerator.IsEnemySquare(squareDownRight, pieceColor);
+            moveDownRight = MoveGenerator.IsSquareFree(board, squareDownRight);
+            enemyDownRight = MoveGenerator.IsEnemySquare(board, squareDownRight, pieceColor);
 
             if (moveDownRight || enemyDownRight)
             {
                 if (foundFriendly && enemyDownRight)
                 {
-                    int enemyPieceType = Piece.PieceType(BoardManager.Instance.square[squareDownRight]);
+                    int enemyPieceType = Piece.PieceType(board.square[squareDownRight]);
 
                     if (enemyPieceType == Piece.Bishop || enemyPieceType == Piece.Queen)
                     {
@@ -424,14 +424,14 @@ public static class PinHandler
                 break;
             }
             
-            moveDownLeft = MoveGenerator.IsSquareFree(squareDownLeft);
-            enemyDownLeft = MoveGenerator.IsEnemySquare(squareDownLeft, pieceColor);
+            moveDownLeft = MoveGenerator.IsSquareFree(board, squareDownLeft);
+            enemyDownLeft = MoveGenerator.IsEnemySquare(board, squareDownLeft, pieceColor);
 
             if (moveDownLeft || enemyDownLeft)
             {
                 if (foundFriendly && enemyDownLeft)
                 {
-                    int enemyPieceType = Piece.PieceType(BoardManager.Instance.square[squareDownLeft]);
+                    int enemyPieceType = Piece.PieceType(board.square[squareDownLeft]);
 
                     if (enemyPieceType == Piece.Bishop || enemyPieceType == Piece.Queen)
                     {

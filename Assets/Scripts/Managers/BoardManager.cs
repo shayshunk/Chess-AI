@@ -15,6 +15,8 @@ public class BoardManager : MonoBehaviour
     public Button rewindButton, forwardButton, skipLastButton, skipFirstButton;
 
     public static BoardManager Instance;
+    public Board MainBoard;
+
     public Sprite[] whiteSprites;
     public Sprite[] blackSprites;
 
@@ -63,8 +65,8 @@ public class BoardManager : MonoBehaviour
             Destroy(_tileObj);
 
         int index = whiteToMove? whiteIndex : blackIndex;
-        int rank = kingSquares[index] / 8;
-        int file = kingSquares[index] % 8;
+        int rank = MainBoard.kingSquares[index] / 8;
+        int file = MainBoard.kingSquares[index] % 8;
 
         for (int x = 0; x < _width; x++)
         {
@@ -97,12 +99,12 @@ public class BoardManager : MonoBehaviour
                     highlightTile.Highlight();
                 }
                 
-                if (currentPlayerInCheck)
+                if (MainBoard.currentPlayerInCheck)
                 {
                     if (x == file && y == rank)
                         spawnedTile.Check();
                 }
-                /*if (attackedSquares.Contains(y * 8 + x))
+                /*if (MainBoard.attackedSquares.Contains(y * 8 + x))
                 {
                     var highlightTile = Instantiate(_tilePrefab, new Vector3(x, y), Quaternion.identity);
                     highlightTile.tag = "Tile";
@@ -125,11 +127,7 @@ public class BoardManager : MonoBehaviour
 
         LoadPosition(FenUtility.startFen);
 
-        kingSquares[whiteIndex] = 4;
-        kingSquares[blackIndex] = 60;
-
-        whiteToMove = true;
-        whiteToMoveStart = whiteToMove;
+        whiteToMoveStart = MainBoard.whiteToMove;
     }
 
     public void LoadPosition(string fen)
@@ -138,32 +136,18 @@ public class BoardManager : MonoBehaviour
 
         var loadedPosition = FenUtility.PositionFromFen(fen);
 
-        for (int squareIndex = 0; squareIndex < 64; squareIndex++)
-        {
-            int piece = loadedPosition.squares[squareIndex];
-            square[squareIndex] = piece;
-            if (piece != 0)
-                pieceList.Add(squareIndex);
-        }
-
-        whiteCastleKingside = loadedPosition.whiteCastleKingside;
-        whiteCastleQueenside = loadedPosition.whiteCastleQueenside;
-        blackCastleKingside = loadedPosition.blackCastleKingside;
-        blackCastleQueenside = loadedPosition.blackCastleQueenside;
-
-        epFile = loadedPosition.epFile;
+        MainBoard = new Board(loadedPosition.epFile, loadedPosition.squares, loadedPosition.whiteToMove, loadedPosition.whiteCastleKingside, 
+                            loadedPosition.whiteCastleQueenside, loadedPosition.blackCastleKingside, loadedPosition.blackCastleQueenside);
 
         if (!playerWhite)
-            System.Array.Reverse(square);
+            System.Array.Reverse(MainBoard.square);
 
-        GenerateAllowedMoves();
-
-        boardHistory.Push(square.Clone() as int[]);
-        List<int> tempPieceList = new List<int>(pieceList);
+        boardHistory.Push(MainBoard.square.Clone() as int[]);
+        List<int> tempPieceList = new List<int>(MainBoard.pieceList);
         pieceListHistory.Push(tempPieceList);
         currentBoardHistoryIndex = 0;
 
-        epFileHistory.Push(epFile);
+        epFileHistory.Push(MainBoard.epFile);
 
         int[] highlightArr = new int[2];
         highlightArr[0] = 100;
@@ -185,7 +169,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int file = 0; file < 8; file ++)
             {
-                if (square[rank * 8 + file] == 0)
+                if (MainBoard.square[rank * 8 + file] == 0)
                     continue;
                 
                 GameObject pieceObj = new();
@@ -202,7 +186,7 @@ public class BoardManager : MonoBehaviour
                 pieceObj.transform.localScale = new Vector3(0.25f, 0.25f, 1);
                 pieceObj.AddComponent<DragDrop>();
 
-                int piece = square[rank * 8 + file];
+                int piece = MainBoard.square[rank * 8 + file];
                 pieceRenderer.sprite = GetSprite(piece);
                 pieceObj.GetComponent<DragDrop>().piece = piece;
                 pieceObj.GetComponent<DragDrop>().file = file;
@@ -231,16 +215,8 @@ public class BoardManager : MonoBehaviour
 
     void Initialize()
     {
-        square = new int[64];
-        kingSquares = new int[2];
-        squaresAroundBlackKing = new bool[8];
-        squaresAroundWhiteKing = new bool[8];
-
         playerWhite = true;
         AIenabled = false;
-        currentPlayerInCheck = false;
-        whiteToMove = true;
-        checkmate = false;
 
         epFileHistory = new Stack<int>();
         boardHistory = new Stack<int[]>();
@@ -249,20 +225,14 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
 
-        for (int i = 0; i < 8; i++)
+        /*for (int i = 0; i < 8; i++)
         {
             squaresAroundWhiteKing[i] = false;
             squaresAroundBlackKing[i] = false;
-        }
-
-        pieceList = new List<int>();
-        attackedSquares = new List<int>();
-        pinnedPieces = new List<int>();
-        pinnedDirection = new List<int>();
-        allowedMoves = new List<List<int>>();
+        }*/
     }
 
-    public void GenerateAllowedMoves()
+    /*public void GenerateAllowedMoves()
     {
         int length = pieceList.Count;
 
@@ -296,7 +266,7 @@ public class BoardManager : MonoBehaviour
                 continue;
             
             List<int> allowedSquares = MoveGenerator.GenerateLegal(pieceList[i], currentPlayerInCheck);
-            allowedMoves[i] = allowedSquares;
+            allowedMoves[i] = allowedSquares.GetRange(0, allowedSquares.Count);
         }
 
         if (currentPlayerInCheck)
@@ -468,14 +438,325 @@ public class BoardManager : MonoBehaviour
             else
                 currentPlayerInCheck = false;
         }
-    }
+    }*/
 
     public void MakeMove(int pieceIndex, int newIndex)
     {
         //Debug.Log("Make move called.");
 
-        AudioClip clipToPlay = regularMove;
+        int file = newIndex % 8;
+        int rank = newIndex / 8;
+
+        int startFile = pieceIndex % 8;
+        int startRank = pieceIndex / 8;
+
+        int piece = MainBoard.square[pieceIndex];
+
+        int pieceListIndex = MainBoard.pieceList.IndexOf(pieceIndex);
+
+        if (MainBoard.allowedMoves[pieceListIndex].Count == 0)
+        {
+            GenerateGrid();
+            DrawPieces();
+            return;
+        }
+
+        if (!MainBoard.allowedMoves[pieceListIndex].Contains(rank * 8 + file))
+        {
+            GenerateGrid();
+            DrawPieces();
+            return;
+        }
+
+        MainBoard.MakeMove(pieceIndex, newIndex);
+
+        whiteToMoveEnd = MainBoard.whiteToMove;
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+
+        soundPlayer.PlayOneShot(MainBoard.clipToPlay);
+
+        rewindButton.interactable = true;
+        skipFirstButton.interactable = true;
+
+        checkmate = MainBoard.checkmate;
+
+        while (currentBoardHistoryIndex != 0)
+        {
+            boardHistory.Pop();
+            pieceListHistory.Pop();
+            highlightHistory.Pop();
+            currentBoardHistoryIndex--;
+        }
+
+        boardHistory.Push(MainBoard.square.Clone() as int[]);
+        List<int> tempPieceList = new List<int>(MainBoard.pieceList);
+        pieceListHistory.Push(tempPieceList);
+
+        epFileHistory.Push(MainBoard.epFile);
+
+        int[] highlightArr = new int[2];
+        highlightArr[0] = startRank * 8 + startFile;
+        highlightArr[1] = rank * 8 + file;
+        highlightHistory.Push(highlightArr.Clone() as int[]);
+
+        TurnHandler();
+    }
+
+    public void TurnHandler()
+    {
+        if (!AIenabled)
+            return;
+
+        if (checkmate)
+        {
+            Debug.Log("You won, checkmate!");
+            return;
+        }
+
+        //Debug.Log("Trying to make move through AI");
         
+        if (playerWhite && !whiteToMove)
+        {
+            AIManager.Instance.MakeMove();
+        }
+        else if (!playerWhite && whiteToMove)
+        {
+            AIManager.Instance.MakeMove();
+        }
+        else
+        {
+            return;
+        }
+
+        int piece = AIManager.Instance.piece;
+        int startFile = AIManager.Instance.startFile;
+        int startRank = AIManager.Instance.startRank;
+        int oldPos = startRank * 8 + startFile;
+        int newPos = AIManager.Instance.newPosition;
+
+        MakeMove(oldPos, newPos);
+    }
+
+    public void UnmakeMove()
+    {
+        //Debug.Log("Unmaking move.");
+        int length = boardHistory.Count;
+
+        boardHistory.ElementAt(currentBoardHistoryIndex + 1).CopyTo(MainBoard.square, 0);
+        MainBoard.pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex + 1);
+        MainBoard.epFile = epFileHistory.ElementAt(currentBoardHistoryIndex + 1);
+
+        int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] % 8;
+        int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] / 8;
+        int file = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[1] % 8;
+        int rank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[1] / 8;
+
+        MainBoard.kingSquares[whiteIndex] = Array.IndexOf(MainBoard.square, 9);
+        MainBoard.kingSquares[blackIndex] = Array.IndexOf(MainBoard.square, 17);
+
+        MainBoard.whiteToMove = !MainBoard.whiteToMove;
+
+        PinHandler.GeneratePins(MainBoard);
+
+        MainBoard.pinnedPieces = PinHandler.GetPins();
+        if (MainBoard.pinnedPieces.Count != 0)
+            MainBoard.pinnedDirection = PinHandler.GetPinDirections();
+
+        MainBoard.GenerateAllAttackedSquares();
+        MainBoard.IsInCheck();
+
+        MainBoard.GenerateAllowedMoves();
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+        currentBoardHistoryIndex++;
+
+        forwardButton.interactable = true;
+        skipLastButton.interactable = true;
+
+        if (currentBoardHistoryIndex + 1 == length)
+        {
+            rewindButton.interactable = false;
+            skipFirstButton.interactable = false;
+        }
+    }
+
+    public void RemakeMove()
+    {
+        //Debug.Log("Remaking move.");
+        
+        boardHistory.ElementAt(currentBoardHistoryIndex - 1).CopyTo(MainBoard.square, 0);
+        MainBoard.pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex - 1);
+        MainBoard.epFile = epFileHistory.ElementAt(currentBoardHistoryIndex - 1);
+
+        int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] % 8;
+        int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] / 8;
+        int file = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[1] % 8;
+        int rank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[1] / 8;
+
+        MainBoard.kingSquares[whiteIndex] = Array.IndexOf(MainBoard.square, 9);
+        MainBoard.kingSquares[blackIndex] = Array.IndexOf(MainBoard.square, 17);
+
+        MainBoard.whiteToMove = !MainBoard.whiteToMove;
+
+        PinHandler.GeneratePins(MainBoard);
+
+        MainBoard.pinnedPieces = PinHandler.GetPins();
+        if (MainBoard.pinnedPieces.Count != 0)
+            MainBoard.pinnedDirection = PinHandler.GetPinDirections();
+
+        MainBoard.GenerateAllAttackedSquares();
+        MainBoard.IsInCheck();
+
+        MainBoard.GenerateAllowedMoves();
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+        currentBoardHistoryIndex--;
+
+        rewindButton.interactable = true;
+        skipFirstButton.interactable = true;
+
+        if (currentBoardHistoryIndex == 0)
+        {
+            forwardButton.interactable = false;
+            skipLastButton.interactable = false;
+        }
+    }
+
+    public void JumpToFirstPosition()
+    {
+        Debug.Log("Jumping to earliest position.");
+        int length = boardHistory.Count;
+
+        boardHistory.ElementAt(length - 1).CopyTo(MainBoard.square, 0);
+        List<int> tempPieces = new List<int>(pieceListHistory.ElementAt(length - 1));
+        MainBoard.pieceList = tempPieces;
+        MainBoard.epFile = epFileHistory.ElementAt(length - 1);
+
+        int startFile = highlightHistory.ElementAt(length - 1)[0] % 8;
+        int startRank = highlightHistory.ElementAt(length - 1)[0] / 8;
+        int file = highlightHistory.ElementAt(length - 1)[1] % 8;
+        int rank = highlightHistory.ElementAt(length - 1)[1] / 8;
+
+        MainBoard.kingSquares[whiteIndex] = Array.IndexOf(MainBoard.square, 9);
+        MainBoard.kingSquares[blackIndex] = Array.IndexOf(MainBoard.square, 17);
+
+        MainBoard.whiteToMove = whiteToMoveStart;
+
+        PinHandler.GeneratePins(MainBoard);
+
+        MainBoard.pinnedPieces = PinHandler.GetPins();
+        if (MainBoard.pinnedPieces.Count != 0)
+            MainBoard.pinnedDirection = PinHandler.GetPinDirections();
+
+        MainBoard.GenerateAllAttackedSquares();
+        MainBoard.IsInCheck();
+
+        MainBoard.GenerateAllowedMoves();
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+        currentBoardHistoryIndex = length - 1;
+
+        rewindButton.interactable = false;
+        skipFirstButton.interactable = false;
+
+        forwardButton.interactable = true;
+        skipLastButton.interactable = true;
+    }
+
+    public void JumpToLatestPosition()
+    {
+        Debug.Log("Jumping to most recent position.");
+
+        boardHistory.ElementAt(0).CopyTo(MainBoard.square, 0);
+        MainBoard.pieceList = pieceListHistory.ElementAt(0);
+        MainBoard.epFile = epFileHistory.ElementAt(0);
+
+        int startFile = highlightHistory.ElementAt(0)[0] % 8;
+        int startRank = highlightHistory.ElementAt(0)[0] / 8;
+        int file = highlightHistory.ElementAt(0)[1] % 8;
+        int rank = highlightHistory.ElementAt(0)[1] / 8;
+
+        MainBoard.kingSquares[whiteIndex] = Array.IndexOf(MainBoard.square, 9);
+        MainBoard.kingSquares[blackIndex] = Array.IndexOf(MainBoard.square, 17);
+
+        MainBoard.whiteToMove = whiteToMoveEnd;
+
+        PinHandler.GeneratePins(MainBoard);
+
+        MainBoard.pinnedPieces = PinHandler.GetPins();
+        if (MainBoard.pinnedPieces.Count != 0)
+            MainBoard.pinnedDirection = PinHandler.GetPinDirections();
+
+        MainBoard.GenerateAllAttackedSquares();
+        MainBoard.IsInCheck();
+        
+        MainBoard.GenerateAllowedMoves();
+
+        GenerateGrid(startRank, startFile, rank, file);
+        DrawPieces();
+        currentBoardHistoryIndex = 0;
+
+        forwardButton.interactable = false;
+        skipLastButton.interactable = false;
+
+        rewindButton.interactable = true;
+        skipFirstButton.interactable = true;
+    }
+
+    public int MoveGenerationTest (int depth, int[] board, bool whiteMove)
+    {
+        int[] tempBoard = new int[64];
+        board.CopyTo(tempBoard, 0);
+
+        int numPositions = 0;
+
+        List<List<int>> newAllowedMoves = new List<List<int>>();
+        List<int> tempAttackedSquares = new List<int>();
+
+        for (int i = 0; i < 64; i++)
+        {
+            if (pieceList[i] == -1)
+                    continue;
+
+            if (whiteMove != Piece.IsColor(square[pieceList[i]], Piece.White))
+            {   
+                MoveGenerator.GenerateLegal(MainBoard, pieceList[i], currentPlayerInCheck);
+                tempAttackedSquares = MoveGenerator.GetAttackedSquares();
+
+                attackedSquares = Enumerable.Union(attackedSquares, tempAttackedSquares).ToList();
+            }
+            else
+            {
+                continue;
+            }
+        }
+        
+
+        while (depth != 0)
+        {
+            foreach (List<int> moveList in allowedMoves)
+            {
+                foreach (int move in moveList)
+                {
+                    int pieceListIndex = allowedMoves.IndexOf(moveList);
+                    int pieceIndex = pieceList[pieceListIndex];
+
+                    MakeMove(pieceIndex, move);
+
+                }
+            }
+        }
+
+        return numPositions;
+    }
+
+    /*public bool PseudoMakeMove(int pieceIndex, int newIndex)
+    {
         int file = newIndex % 8;
         int rank = newIndex / 8;
 
@@ -486,24 +767,11 @@ public class BoardManager : MonoBehaviour
 
         int pieceListIndex = pieceList.IndexOf(pieceIndex);
 
-        if (allowedMoves[pieceListIndex].Count == 0)
-        {
-            DrawPieces();
-            return;
-        }
-
-        if (!allowedMoves[pieceListIndex].Contains(rank * 8 + file))
-        {
-            DrawPieces();
-            return;
-        }
-
         int takenPieceIndex = -1;
 
         if (square[rank * 8 + file] != 0)
         {
             takenPieceIndex = rank * 8 + file;
-            clipToPlay = capture;
         }
         
         whiteToMove = !whiteToMove;
@@ -641,13 +909,10 @@ public class BoardManager : MonoBehaviour
 
         IsInCheck();
 
-        if (currentPlayerInCheck)
-            clipToPlay = notify;
-
         GenerateAllowedMoves();
 
-        GenerateGrid(startRank, startFile, rank, file);
-        DrawPieces();
+        //GenerateGrid(startRank, startFile, rank, file);
+        //DrawPieces();
 
         rewindButton.interactable = true;
         skipFirstButton.interactable = true;
@@ -676,7 +941,7 @@ public class BoardManager : MonoBehaviour
         //Debug.Log("Current player in check?: " + currentPlayerInCheck);
         //Debug.Log("Checkmate? " + checkmate);
 
-        soundPlayer.PlayOneShot(clipToPlay);
+        //soundPlayer.PlayOneShot(clipToPlay);
 
         while (currentBoardHistoryIndex != 0)
         {
@@ -697,248 +962,7 @@ public class BoardManager : MonoBehaviour
         highlightArr[1] = rank * 8 + file;
         highlightHistory.Push(highlightArr.Clone() as int[]);
 
-        TurnHandler();
-    }
+        return pseudoWhiteMove;
 
-    public void TurnHandler()
-    {
-        if (!AIenabled)
-            return;
-
-        if (checkmate)
-        {
-            Debug.Log("You won, checkmate!");
-            return;
-        }
-
-        //Debug.Log("Trying to make move through AI");
-        
-        if (playerWhite && !whiteToMove)
-        {
-            AIManager.Instance.MakeMove();
-        }
-        else if (!playerWhite && whiteToMove)
-        {
-            AIManager.Instance.MakeMove();
-        }
-        else
-        {
-            return;
-        }
-
-        int piece = AIManager.Instance.piece;
-        int startFile = AIManager.Instance.startFile;
-        int startRank = AIManager.Instance.startRank;
-        int oldPos = startRank * 8 + startFile;
-        int newPos = AIManager.Instance.newPosition;
-
-        MakeMove(oldPos, newPos);
-    }
-
-    public void UnmakeMove()
-    {
-        //Debug.Log("Unmaking move.");
-        int length = boardHistory.Count;
-
-        boardHistory.ElementAt(currentBoardHistoryIndex + 1).CopyTo(square, 0);
-        pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex + 1);
-        epFile = epFileHistory.ElementAt(currentBoardHistoryIndex + 1);
-
-        int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] % 8;
-        int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[0] / 8;
-        int file = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[1] % 8;
-        int rank = highlightHistory.ElementAt(currentBoardHistoryIndex + 1)[1] / 8;
-
-        kingSquares[whiteIndex] = Array.IndexOf(square, 9);
-        kingSquares[blackIndex] = Array.IndexOf(square, 17);
-
-        whiteToMove = !whiteToMove;
-
-        if (whiteToMove)
-            squaresAroundWhiteKing = PinHandler.GeneratePins();
-        
-        else
-            squaresAroundBlackKing = PinHandler.GeneratePins();
-
-        pinnedPieces = PinHandler.GetPins();
-        if (pinnedPieces.Count != 0)
-            pinnedDirection = PinHandler.GetPinDirections();
-
-        GenerateAllAttackedSquares();
-        IsInCheck();
-
-        GenerateAllowedMoves();
-
-        GenerateGrid(startRank, startFile, rank, file);
-        DrawPieces();
-        currentBoardHistoryIndex++;
-
-        forwardButton.interactable = true;
-        skipLastButton.interactable = true;
-
-        if (currentBoardHistoryIndex + 1 == length)
-        {
-            rewindButton.interactable = false;
-            skipFirstButton.interactable = false;
-        }
-    }
-
-    public void RemakeMove()
-    {
-        //Debug.Log("Remaking move.");
-        
-        boardHistory.ElementAt(currentBoardHistoryIndex - 1).CopyTo(square, 0);
-        pieceList = pieceListHistory.ElementAt(currentBoardHistoryIndex - 1);
-        epFile = epFileHistory.ElementAt(currentBoardHistoryIndex - 1);
-
-        int startFile = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] % 8;
-        int startRank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[0] / 8;
-        int file = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[1] % 8;
-        int rank = highlightHistory.ElementAt(currentBoardHistoryIndex - 1)[1] / 8;
-
-        kingSquares[whiteIndex] = Array.IndexOf(square, 9);
-        kingSquares[blackIndex] = Array.IndexOf(square, 17);
-
-        whiteToMove = !whiteToMove;
-
-        if (whiteToMove)
-            squaresAroundWhiteKing = PinHandler.GeneratePins();
-        
-        else
-            squaresAroundBlackKing = PinHandler.GeneratePins();
-
-        pinnedPieces = PinHandler.GetPins();
-        if (pinnedPieces.Count != 0)
-            pinnedDirection = PinHandler.GetPinDirections();
-
-        GenerateAllAttackedSquares();
-        IsInCheck();
-
-        GenerateAllowedMoves();
-
-        GenerateGrid(startRank, startFile, rank, file);
-        DrawPieces();
-        currentBoardHistoryIndex--;
-
-        rewindButton.interactable = true;
-        skipFirstButton.interactable = true;
-
-        if (currentBoardHistoryIndex == 0)
-        {
-            forwardButton.interactable = false;
-            skipLastButton.interactable = false;
-        }
-    }
-
-    public void JumpToFirstPosition()
-    {
-        Debug.Log("Jumping to earliest position.");
-        int length = boardHistory.Count;
-
-        boardHistory.ElementAt(length - 1).CopyTo(square, 0);
-        List<int> tempPieces = new List<int>(pieceListHistory.ElementAt(length - 1));
-        pieceList = tempPieces;
-        epFile = epFileHistory.ElementAt(length - 1);
-
-        int startFile = highlightHistory.ElementAt(length - 1)[0] % 8;
-        int startRank = highlightHistory.ElementAt(length - 1)[0] / 8;
-        int file = highlightHistory.ElementAt(length - 1)[1] % 8;
-        int rank = highlightHistory.ElementAt(length - 1)[1] / 8;
-
-        kingSquares[whiteIndex] = Array.IndexOf(square, 9);
-        kingSquares[blackIndex] = Array.IndexOf(square, 17);
-
-        whiteToMove = whiteToMoveStart;
-
-        if (whiteToMove)
-            squaresAroundWhiteKing = PinHandler.GeneratePins();
-        
-        else
-            squaresAroundBlackKing = PinHandler.GeneratePins();
-
-        pinnedPieces = PinHandler.GetPins();
-        if (pinnedPieces.Count != 0)
-            pinnedDirection = PinHandler.GetPinDirections();
-
-        GenerateAllAttackedSquares();
-        IsInCheck();
-
-        GenerateAllowedMoves();
-
-        GenerateGrid(startRank, startFile, rank, file);
-        DrawPieces();
-        currentBoardHistoryIndex = length - 1;
-
-        rewindButton.interactable = false;
-        skipFirstButton.interactable = false;
-
-        forwardButton.interactable = true;
-        skipLastButton.interactable = true;
-    }
-
-    public void JumpToLatestPosition()
-    {
-        Debug.Log("Jumping to most recent position.");
-
-        boardHistory.ElementAt(0).CopyTo(square, 0);
-        pieceList = pieceListHistory.ElementAt(0);
-        epFile = epFileHistory.ElementAt(0);
-
-        int startFile = highlightHistory.ElementAt(0)[0] % 8;
-        int startRank = highlightHistory.ElementAt(0)[0] / 8;
-        int file = highlightHistory.ElementAt(0)[1] % 8;
-        int rank = highlightHistory.ElementAt(0)[1] / 8;
-
-        kingSquares[whiteIndex] = Array.IndexOf(square, 9);
-        kingSquares[blackIndex] = Array.IndexOf(square, 17);
-
-        whiteToMove = whiteToMoveEnd;
-
-        if (whiteToMove)
-            squaresAroundWhiteKing = PinHandler.GeneratePins();
-        
-        else
-            squaresAroundBlackKing = PinHandler.GeneratePins();
-
-        pinnedPieces = PinHandler.GetPins();
-        if (pinnedPieces.Count != 0)
-            pinnedDirection = PinHandler.GetPinDirections();
-
-        GenerateAllAttackedSquares();
-        IsInCheck();
-        
-        GenerateAllowedMoves();
-
-        GenerateGrid(startRank, startFile, rank, file);
-        DrawPieces();
-        currentBoardHistoryIndex = 0;
-
-        forwardButton.interactable = false;
-        skipLastButton.interactable = false;
-
-        rewindButton.interactable = true;
-        skipFirstButton.interactable = true;
-    }
-
-    public int MoveGenerationTest (int depth)
-    {
-        int numPositions = 0;
-
-        while (depth != 0)
-        {
-            foreach (List<int> moveList in allowedMoves)
-            {
-                foreach (int move in moveList)
-                {
-                    int pieceListIndex = allowedMoves.IndexOf(moveList);
-                    int pieceIndex = pieceList[pieceListIndex];
-
-                    MakeMove(pieceIndex, move);
-
-                }
-            }
-        }
-
-        return numPositions;
-    }
+    }*/
 }

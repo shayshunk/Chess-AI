@@ -10,7 +10,7 @@ public static class GenerateCheck
     {
         _causesCheck = false;
     }
-    public static bool GeneratePawnCheck(int piece, int pieceIndex)
+    public static bool GeneratePawnCheck(Board board, int piece, int pieceIndex)
     {
         if (Piece.IsColor(piece, Piece.White))
         {
@@ -31,7 +31,7 @@ public static class GenerateCheck
         return _causesCheck;
     }
 
-    public static bool GenerateBishopCheck(int piece, int pieceIndex)
+    public static bool GenerateBishopCheck(Board board, int piece, int pieceIndex)
     {
         int squareUpRight = pieceIndex + 9;
         int squareUpLeft = pieceIndex + 7;
@@ -55,8 +55,8 @@ public static class GenerateCheck
             if (squareUpRight % 8 == 0)
                 break;
             
-            moveUpRight = MoveGenerator.IsSquareFree(squareUpRight);
-            enemyUpRight = MoveGenerator.IsEnemySquare(squareUpRight, pieceColor);
+            moveUpRight = MoveGenerator.IsSquareFree(board, squareUpRight);
+            enemyUpRight = MoveGenerator.IsEnemySquare(board, squareUpRight, pieceColor);
             
             if (moveUpRight || enemyUpRight)
             {    
@@ -83,8 +83,8 @@ public static class GenerateCheck
             if (squareUpLeft % 8 == 7)
                 break;
             
-            moveUpLeft = MoveGenerator.IsSquareFree(squareUpLeft);
-            enemyUpLeft = MoveGenerator.IsEnemySquare(squareUpLeft, pieceColor);
+            moveUpLeft = MoveGenerator.IsSquareFree(board, squareUpLeft);
+            enemyUpLeft = MoveGenerator.IsEnemySquare(board, squareUpLeft, pieceColor);
             
             if (moveUpLeft || enemyUpLeft)
             {
@@ -113,8 +113,8 @@ public static class GenerateCheck
             if (squareDownRight % 8 == 0)
                 break;
             
-            moveDownRight = MoveGenerator.IsSquareFree(squareDownRight);
-            enemyDownRight = MoveGenerator.IsEnemySquare(squareDownRight, pieceColor);
+            moveDownRight = MoveGenerator.IsSquareFree(board, squareDownRight);
+            enemyDownRight = MoveGenerator.IsEnemySquare(board, squareDownRight, pieceColor);
 
             if (moveDownRight || enemyDownRight)
             {   
@@ -141,8 +141,8 @@ public static class GenerateCheck
             if (squareDownLeft % 8 == 7)
                 break;
             
-            moveDownLeft = MoveGenerator.IsSquareFree(squareDownLeft);
-            enemyDownLeft = MoveGenerator.IsEnemySquare(squareDownLeft, pieceColor);
+            moveDownLeft = MoveGenerator.IsSquareFree(board, squareDownLeft);
+            enemyDownLeft = MoveGenerator.IsEnemySquare(board, squareDownLeft, pieceColor);
 
             if (moveDownLeft || enemyDownLeft)
             {                    
@@ -168,7 +168,7 @@ public static class GenerateCheck
         return _causesCheck;
     }
 
-    public static bool GenerateRookCheck(int piece, int pieceIndex)
+    public static bool GenerateRookCheck(Board board, int piece, int pieceIndex)
     {
         int squareUp = pieceIndex + 8;
         int squareLeft = pieceIndex - 1;
@@ -192,8 +192,8 @@ public static class GenerateCheck
             if (squareUp / 8 == 8)
                 break;
             
-            moveUp = MoveGenerator.IsSquareFree(squareUp);
-            enemyUp = MoveGenerator.IsEnemySquare(squareUp, pieceColor);
+            moveUp = MoveGenerator.IsSquareFree(board, squareUp);
+            enemyUp = MoveGenerator.IsEnemySquare(board, squareUp, pieceColor);
             
             if (moveUp || enemyUp)
             {                    
@@ -219,8 +219,8 @@ public static class GenerateCheck
             if (squareLeft % 8 == 7)
                 break;
             
-            moveLeft = MoveGenerator.IsSquareFree(squareLeft);
-            enemyLeft = MoveGenerator.IsEnemySquare(squareLeft, pieceColor);
+            moveLeft = MoveGenerator.IsSquareFree(board, squareLeft);
+            enemyLeft = MoveGenerator.IsEnemySquare(board, squareLeft, pieceColor);
             
             if (moveLeft || enemyLeft)
             {
@@ -245,8 +245,8 @@ public static class GenerateCheck
             if (squareRight % 8 == 0)
                 break;
             
-            moveRight = MoveGenerator.IsSquareFree(squareRight);
-            enemyRight = MoveGenerator.IsEnemySquare(squareRight, pieceColor);
+            moveRight = MoveGenerator.IsSquareFree(board, squareRight);
+            enemyRight = MoveGenerator.IsEnemySquare(board, squareRight, pieceColor);
 
             if (moveRight || enemyRight)
             {
@@ -268,8 +268,8 @@ public static class GenerateCheck
         }
         while (squareDown >= 0)
         {            
-            moveDown = MoveGenerator.IsSquareFree(squareDown);
-            enemyDown = MoveGenerator.IsEnemySquare(squareDown, pieceColor);
+            moveDown = MoveGenerator.IsSquareFree(board, squareDown);
+            enemyDown = MoveGenerator.IsEnemySquare(board, squareDown, pieceColor);
 
             if (moveDown || enemyDown)
             {
@@ -293,7 +293,7 @@ public static class GenerateCheck
         return _causesCheck;
     }
 
-    public static bool GenerateQueenCheck(int piece, int pieceIndex)
+    public static bool GenerateQueenCheck(Board board, int piece, int pieceIndex)
     {
         int squareUp = pieceIndex + 8;
         int squareLeft = pieceIndex - 1;
@@ -325,8 +325,8 @@ public static class GenerateCheck
             if (squareUp / 8 == 8)
                 break;
             
-            moveUp = MoveGenerator.IsSquareFree(squareUp);
-            enemyUp = MoveGenerator.IsEnemySquare(squareUp, pieceColor);
+            moveUp = MoveGenerator.IsSquareFree(board, squareUp);
+            enemyUp = MoveGenerator.IsEnemySquare(board, squareUp, pieceColor);
             
             if (moveUp || enemyUp)
             {
@@ -351,8 +351,8 @@ public static class GenerateCheck
             if (squareLeft % 8 == 7)
                 break;
             
-            moveLeft = MoveGenerator.IsSquareFree(squareLeft);
-            enemyLeft = MoveGenerator.IsEnemySquare(squareLeft, pieceColor);
+            moveLeft = MoveGenerator.IsSquareFree(board, squareLeft);
+            enemyLeft = MoveGenerator.IsEnemySquare(board, squareLeft, pieceColor);
             
             if (moveLeft || enemyLeft)
             {
@@ -377,8 +377,8 @@ public static class GenerateCheck
             if (squareRight % 8 == 0)
                 break;
             
-            moveRight = MoveGenerator.IsSquareFree(squareRight);
-            enemyRight = MoveGenerator.IsEnemySquare(squareRight, pieceColor);
+            moveRight = MoveGenerator.IsSquareFree(board, squareRight);
+            enemyRight = MoveGenerator.IsEnemySquare(board, squareRight, pieceColor);
 
             if (moveRight || enemyRight)
             {
@@ -400,8 +400,8 @@ public static class GenerateCheck
         }
         while (squareDown >= 0)
         {            
-            moveDown = MoveGenerator.IsSquareFree(squareDown);
-            enemyDown = MoveGenerator.IsEnemySquare(squareDown, pieceColor);
+            moveDown = MoveGenerator.IsSquareFree(board, squareDown);
+            enemyDown = MoveGenerator.IsEnemySquare(board, squareDown, pieceColor);
 
             if (moveDown || enemyDown)
             {
@@ -426,8 +426,8 @@ public static class GenerateCheck
             if (squareUpRight % 8 == 0)
                 break;
             
-            moveUpRight = MoveGenerator.IsSquareFree(squareUpRight);
-            enemyUpRight = MoveGenerator.IsEnemySquare(squareUpRight, pieceColor);
+            moveUpRight = MoveGenerator.IsSquareFree(board, squareUpRight);
+            enemyUpRight = MoveGenerator.IsEnemySquare(board, squareUpRight, pieceColor);
             
             if (moveUpRight || enemyUpRight)
             {
@@ -452,8 +452,8 @@ public static class GenerateCheck
             if (squareUpLeft % 8 == 7)
                 break;
             
-            moveUpLeft = MoveGenerator.IsSquareFree(squareUpLeft);
-            enemyUpLeft = MoveGenerator.IsEnemySquare(squareUpLeft, pieceColor);
+            moveUpLeft = MoveGenerator.IsSquareFree(board, squareUpLeft);
+            enemyUpLeft = MoveGenerator.IsEnemySquare(board, squareUpLeft, pieceColor);
             
             if (moveUpLeft || enemyUpLeft)
             {
@@ -478,8 +478,8 @@ public static class GenerateCheck
             if (squareDownRight % 8 == 0)
                 break;
             
-            moveDownRight = MoveGenerator.IsSquareFree(squareDownRight);
-            enemyDownRight = MoveGenerator.IsEnemySquare(squareDownRight, pieceColor);
+            moveDownRight = MoveGenerator.IsSquareFree(board, squareDownRight);
+            enemyDownRight = MoveGenerator.IsEnemySquare(board, squareDownRight, pieceColor);
 
             if (moveDownRight || enemyDownRight)
             {
@@ -504,8 +504,8 @@ public static class GenerateCheck
             if (squareDownLeft % 8 == 7)
                 break;
             
-            moveDownLeft = MoveGenerator.IsSquareFree(squareDownLeft);
-            enemyDownLeft = MoveGenerator.IsEnemySquare(squareDownLeft, pieceColor);
+            moveDownLeft = MoveGenerator.IsSquareFree(board, squareDownLeft);
+            enemyDownLeft = MoveGenerator.IsEnemySquare(board, squareDownLeft, pieceColor);
 
             if (moveDownLeft || enemyDownLeft)
             {
@@ -529,7 +529,7 @@ public static class GenerateCheck
         return _causesCheck;
     }
 
-    public static bool GenerateKnightCheck(int piece, int pieceIndex)
+    public static bool GenerateKnightCheck(Board board, int piece, int pieceIndex)
     {
         int rank = pieceIndex / 8;
         int file = pieceIndex % 8;
@@ -561,7 +561,7 @@ public static class GenerateCheck
    
         if (rank < 6 && file < 7)
         {
-            enemyUpUpRight = MoveGenerator.IsEnemySquare(squareUpUpRight, pieceColor);
+            enemyUpUpRight = MoveGenerator.IsEnemySquare(board, squareUpUpRight, pieceColor);
             
             if (enemyUpUpRight && squareUpUpRight == BoardManager.Instance.kingSquares[enemyColor])
             {
@@ -571,7 +571,7 @@ public static class GenerateCheck
         }
         if (rank < 7 && file < 6)
         {
-            enemyUpRightRight = MoveGenerator.IsEnemySquare(squareUpRightRight, pieceColor);
+            enemyUpRightRight = MoveGenerator.IsEnemySquare(board, squareUpRightRight, pieceColor);
 
             if (enemyUpRightRight && squareUpRightRight == BoardManager.Instance.kingSquares[enemyColor])
             {
@@ -581,7 +581,7 @@ public static class GenerateCheck
         }
         if (rank < 6 && file > 0)
         {
-            enemyUpUpLeft = MoveGenerator.IsEnemySquare(squareUpUpLeft, pieceColor);
+            enemyUpUpLeft = MoveGenerator.IsEnemySquare(board, squareUpUpLeft, pieceColor);
 
             if (enemyUpUpLeft && squareUpUpLeft == BoardManager.Instance.kingSquares[enemyColor])
             {
@@ -591,7 +591,7 @@ public static class GenerateCheck
         }
         if (rank < 7 && file > 1)
         {
-            enemyUpLeftLeft = MoveGenerator.IsEnemySquare(squareUpLeftLeft, pieceColor);
+            enemyUpLeftLeft = MoveGenerator.IsEnemySquare(board, squareUpLeftLeft, pieceColor);
 
             if (enemyUpLeftLeft && squareUpLeftLeft == BoardManager.Instance.kingSquares[enemyColor])
             {
@@ -601,7 +601,7 @@ public static class GenerateCheck
         }
         if (rank > 1 && file > 0)
         {
-            enemyDownDownLeft = MoveGenerator.IsEnemySquare(squareDownDownLeft, pieceColor);
+            enemyDownDownLeft = MoveGenerator.IsEnemySquare(board, squareDownDownLeft, pieceColor);
 
             if (enemyDownDownLeft && squareDownDownLeft == BoardManager.Instance.kingSquares[enemyColor])
             {
@@ -611,7 +611,7 @@ public static class GenerateCheck
         }
         if (rank > 0 && file > 1)
         {
-            enemyDownLeftLeft = MoveGenerator.IsEnemySquare(squareDownLeftLeft, pieceColor);
+            enemyDownLeftLeft = MoveGenerator.IsEnemySquare(board, squareDownLeftLeft, pieceColor);
             
             if (enemyDownLeftLeft && squareDownLeftLeft == BoardManager.Instance.kingSquares[enemyColor])
             {
@@ -621,7 +621,7 @@ public static class GenerateCheck
         }
         if (rank > 1 && file < 7)
         {
-            enemyDownDownRight = MoveGenerator.IsEnemySquare(squareDownDownRight, pieceColor);
+            enemyDownDownRight = MoveGenerator.IsEnemySquare(board, squareDownDownRight, pieceColor);
 
             if (enemyDownDownRight && squareDownDownRight == BoardManager.Instance.kingSquares[enemyColor])
             {
@@ -631,7 +631,7 @@ public static class GenerateCheck
         }
         if (rank > 0 && file < 6)
         {
-            enemyDownRightRight = MoveGenerator.IsEnemySquare(squareDownRightRight, pieceColor);
+            enemyDownRightRight = MoveGenerator.IsEnemySquare(board, squareDownRightRight, pieceColor);
 
             if (enemyDownRightRight && squareDownRightRight == BoardManager.Instance.kingSquares[enemyColor])
             {
