@@ -491,47 +491,45 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = true;
     }
 
-    public int MoveGenerationTest (Board board, int depth)
+    public int MoveGenerationTest(Board board, int depth)
     {
-        int[] tempBoard = new int[64];
-        board.CopyTo(tempBoard, 0);
-
+        if (depth == 0)
+            return 1;
+        
         int numPositions = 0;
 
-        List<List<int>> newAllowedMoves = new List<List<int>>();
-        List<int> tempAttackedSquares = new List<int>();
-
-        for (int i = 0; i < 64; i++)
+        foreach (List<int> moveList in board.allowedMoves)
         {
-            if (pieceList[i] == -1)
-                    continue;
-
-            if (whiteMove != Piece.IsColor(square[pieceList[i]], Piece.White))
-            {   
-                MoveGenerator.GenerateLegal(MainBoard, pieceList[i], currentPlayerInCheck);
-                tempAttackedSquares = MoveGenerator.GetAttackedSquares();
-
-                attackedSquares = Enumerable.Union(attackedSquares, tempAttackedSquares).ToList();
-            }
-            else
+            foreach (int move in moveList)
             {
-                continue;
-            }
-        }
-        
+                List<int> tempPieceList = new List<int>(board.pieceList);
+                int[] tempSquare = new int[64];
+                int tempEP = board.epFile;
+                bool whiteCastleKingside = board.whiteCastleKingside;
+                bool whiteCastleQueenside = board.whiteCastleQueenside;
+                bool blackCastleKingside = board.blackCastleKingside;
+                bool blackCastleQueenside = board.blackCastleQueenside;
+                board.square.CopyTo(tempSquare, 0);
 
-        while (depth != 0)
-        {
-            foreach (List<int> moveList in allowedMoves)
-            {
-                foreach (int move in moveList)
-                {
-                    int pieceListIndex = allowedMoves.IndexOf(moveList);
-                    int pieceIndex = pieceList[pieceListIndex];
 
-                    MakeMove(pieceIndex, move);
+                int pieceListIndex = board.allowedMoves.IndexOf(moveList);
+                int pieceIndex = board.pieceList[pieceListIndex];
 
-                }
+                PseudoMakeMove(board, pieceIndex, move);
+
+                Board newBoard = new Board(board.epFile, board.square, board.whiteToMove, board.whiteCastleKingside, board.whiteCastleQueenside, board.blackCastleKingside, board.blackCastleQueenside);
+
+                numPositions += MoveGenerationTest(newBoard, depth - 1);
+
+                board.pieceList = tempPieceList;
+                board.square = tempSquare;
+                board.whiteToMove = !board.whiteToMove;
+                board.epFile = tempEP;
+                board.whiteCastleKingside = whiteCastleKingside;
+                board.whiteCastleQueenside = whiteCastleQueenside;
+                board.blackCastleKingside = blackCastleKingside;
+                board.blackCastleQueenside = blackCastleQueenside;
+                board.GenerateAllAttackedSquares();
             }
         }
 
