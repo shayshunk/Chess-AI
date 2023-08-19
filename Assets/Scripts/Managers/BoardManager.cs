@@ -491,7 +491,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = true;
     }
 
-    public int MoveGenerationTest (int depth, int[] board, bool whiteMove)
+    public int MoveGenerationTest (Board board, int depth)
     {
         int[] tempBoard = new int[64];
         board.CopyTo(tempBoard, 0);
@@ -538,7 +538,7 @@ public class BoardManager : MonoBehaviour
         return numPositions;
     }
 
-    /*public bool PseudoMakeMove(int pieceIndex, int newIndex)
+    public bool PseudoMakeMove(Board tempBoard, int pieceIndex, int newIndex)
     {
         int file = newIndex % 8;
         int rank = newIndex / 8;
@@ -546,206 +546,14 @@ public class BoardManager : MonoBehaviour
         int startFile = pieceIndex % 8;
         int startRank = pieceIndex / 8;
 
-        int piece = square[pieceIndex];
+        int piece = tempBoard.square[pieceIndex];
 
-        int pieceListIndex = pieceList.IndexOf(pieceIndex);
+        int pieceListIndex = tempBoard.pieceList.IndexOf(pieceIndex);
 
-        int takenPieceIndex = -1;
+        tempBoard.MakeMove(pieceIndex, newIndex);
 
-        if (square[rank * 8 + file] != 0)
-        {
-            takenPieceIndex = rank * 8 + file;
-        }
-        
-        whiteToMove = !whiteToMove;
-        whiteToMoveEnd = whiteToMove;
+        bool tempCheckmate = tempBoard.checkmate;
 
-        pinnedPieces.Clear();
-        pinnedDirection.Clear();
-        
-        int pieceColor = Piece.Color(piece);
-        int pieceType = Piece.PieceType(piece);
-
-        if (pieceType == Piece.Pawn) 
-        {
-            if (rank == 7 || rank == 0)
-                pieceType = Piece.Queen;
-            
-            if ((startFile == epFile + 1 || startFile == epFile - 1) && file == epFile)
-            {
-                if (startRank == 4 && pieceColor == Piece.White)
-                {
-                    square[startRank * 8 + epFile] = 0;
-                    takenPieceIndex = startRank * 8 + epFile;
-                }
-                else if (startRank == 3 && pieceColor == Piece.Black)
-                {
-                    square[startRank * 8 + epFile] = 0;
-                    takenPieceIndex = startRank * 8 + epFile;
-                }
-            }
-
-            if ((startRank == 1 && rank == 3) || (startRank == 6 && rank == 4))
-                epFile = file;
-            else
-                epFile = 88;
-
-        }
-
-        else if (pieceType == Piece.King)
-        {
-            if (pieceColor == Piece.White)
-            {
-                kingSquares[whiteIndex] = rank * 8 + file;
-
-                if (rank * 8 + file == 6 && whiteCastleKingside && square[7] == 14)
-                {
-                    square[7] = 0;
-                    square[5] = 14;
-                }
-                else if (rank * 8 + file == 2 && whiteCastleQueenside && square[0] == 14)
-                {
-                    square[0] = 0;
-                    square[3] = 14;
-                }
-
-                whiteCastleKingside = false;
-                whiteCastleQueenside = false;
-            }
-            else
-            {
-                kingSquares[blackIndex] = rank * 8 + file;
-
-                if (rank * 8 + file == 62 && blackCastleKingside && square[63] == 22)
-                {
-                    square[63] = 0;
-                    square[61] = 22;
-                }
-                else if (rank * 8 + file == 58 && blackCastleQueenside && square[56] == 22)
-                {
-                    square[56] = 0;
-                    square[59] = 22;
-                }
-
-                blackCastleKingside = false;
-                blackCastleQueenside = false;
-            }
-        }
-
-        else if (pieceType == Piece.Rook)
-        {
-            if (startRank * 8 + startFile == 0)
-                whiteCastleQueenside = false;
-            else if (startRank * 8 + startFile == 7)
-                whiteCastleKingside = false;
-            else if (startRank * 8 + startFile == 56)
-                blackCastleQueenside = false;
-            else if (startRank * 8 + startFile == 63)
-                blackCastleKingside = false;
-        }
-
-        else
-        {
-            epFile = 88;
-        }
-
-        piece = pieceType | pieceColor;
-
-        if (takenPieceIndex != -1)
-        {
-            int takenPieceListIndex = pieceList.IndexOf(takenPieceIndex);
-
-            if (Piece.PieceType(square[pieceList[takenPieceListIndex]]) == Piece.Rook)
-            {
-                if (pieceList[takenPieceListIndex] == 0)
-                    whiteCastleQueenside = false;
-                else if (pieceList[takenPieceListIndex] == 7)
-                    whiteCastleKingside = false;
-                else if (pieceList[takenPieceListIndex] == 56)
-                    blackCastleQueenside = false;
-                else if (pieceList[takenPieceListIndex] == 63)
-                    blackCastleKingside = false;
-            }
-            pieceList[takenPieceListIndex] = -1;
-
-            //Debug.Log("Piece at: " + takenPieceIndex + " was taken!");
-        }
-
-        square[startRank * 8 + startFile] = 0;
-        square[rank * 8 + file] = piece;
-
-        if (pieceListIndex != -1)
-            pieceList[pieceListIndex] = rank * 8 + file;
-        
-        if (whiteToMove)
-            squaresAroundWhiteKing = PinHandler.GeneratePins();
-        
-        else
-            squaresAroundBlackKing = PinHandler.GeneratePins();
-
-        pinnedPieces = PinHandler.GetPins();
-        if (pinnedPieces.Count != 0)
-            pinnedDirection = PinHandler.GetPinDirections();
-        
-        GenerateAllAttackedSquares();
-        //GenerateSlidingAttackedSquares(startRank * 8 + startFile, rank * 8 + file);
-
-        IsInCheck();
-
-        GenerateAllowedMoves();
-
-        //GenerateGrid(startRank, startFile, rank, file);
-        //DrawPieces();
-
-        rewindButton.interactable = true;
-        skipFirstButton.interactable = true;
-
-        plyCount++;
-
-        if (currentPlayerInCheck)
-        {
-            checkmate = true;
-
-            foreach (List<int> moveList in allowedMoves)
-            {
-                if (pieceList[allowedMoves.IndexOf(moveList)] == -1)
-                    continue;
-                if (whiteToMove != Piece.IsColor(square[pieceList[allowedMoves.IndexOf(moveList)]], Piece.White))
-                    continue;
-                
-                if (moveList.Count != 0)
-                {
-                    checkmate = false;
-                    break;
-                }
-            }
-        }
-        
-        //Debug.Log("Current player in check?: " + currentPlayerInCheck);
-        //Debug.Log("Checkmate? " + checkmate);
-
-        //soundPlayer.PlayOneShot(clipToPlay);
-
-        while (currentBoardHistoryIndex != 0)
-        {
-            boardHistory.Pop();
-            pieceListHistory.Pop();
-            highlightHistory.Pop();
-            currentBoardHistoryIndex--;
-        }
-
-        boardHistory.Push(square.Clone() as int[]);
-        List<int> tempPieceList = new List<int>(pieceList);
-        pieceListHistory.Push(tempPieceList);
-
-        epFileHistory.Push(epFile);
-
-        int[] highlightArr = new int[2];
-        highlightArr[0] = startRank * 8 + startFile;
-        highlightArr[1] = rank * 8 + file;
-        highlightHistory.Push(highlightArr.Clone() as int[]);
-
-        return pseudoWhiteMove;
-
-    }*/
+        return tempCheckmate;
+    }
 }
