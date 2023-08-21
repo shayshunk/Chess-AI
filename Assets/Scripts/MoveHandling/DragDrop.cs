@@ -90,7 +90,7 @@ public class DragDrop : MonoBehaviour
             int oldPos = rank * 8 + file;
             int newPos = newRank * 8 + newFile;
 
-            BoardManager.Instance.MakeMove(oldPos, newPos);
+            StartCoroutine(BoardManager.Instance.MakeMove(oldPos, newPos));
         }
     }
 }

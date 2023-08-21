@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class Board : MonoBehaviour
+public class Board
 {
     public int plyCount, fiftyMoveCounter, whiteIndex, blackIndex, epFile;
     public int[] square, kingSquares;
@@ -246,8 +246,6 @@ public class Board : MonoBehaviour
 
     public void MakeMove(int pieceIndex, int newIndex)
     {
-        //Debug.Log("Make move called.");
-
         clipToPlay = BoardManager.Instance.regularMove;
         
         int file = newIndex % 8;
@@ -262,6 +260,9 @@ public class Board : MonoBehaviour
 
         int takenPieceIndex = -1;
 
+        if (rank * 8 + file > 63)
+            Debug.Log("Square of: " + (rank * 8 + file));
+        
         if (square[rank * 8 + file] != 0)
         {
             takenPieceIndex = rank * 8 + file;
@@ -278,8 +279,19 @@ public class Board : MonoBehaviour
 
         if (pieceType == Piece.Pawn) 
         {
+            Debug.Log("Piece is pawn.");
             if (rank == 7 || rank == 0)
-                pieceType = Piece.Queen;
+            {
+                Debug.Log("Piece is being promoted.");
+                if (BoardManager.Instance.promotionIndex == 100)
+                    pieceType = Piece.Queen;
+                else if (BoardManager.Instance.promotionIndex == 200)
+                    pieceType = Piece.Rook;
+                else if (BoardManager.Instance.promotionIndex == 300)
+                    pieceType = Piece.Bishop;
+                else if (BoardManager.Instance.promotionIndex == 400)
+                    pieceType = Piece.Knight;
+            }
             
             if ((startFile == epFile + 1 || startFile == epFile - 1) && file == epFile)
             {

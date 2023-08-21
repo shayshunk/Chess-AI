@@ -99,6 +99,14 @@ public static class GeneratePseudoLegal
             if (moveOne)
             {
                 _allowedSquares.Add(squareUp);
+
+                if (squareUp / 8 == 7)
+                {
+                    _allowedSquares.Add(100);
+                    _allowedSquares.Add(200);
+                    _allowedSquares.Add(300);
+                    _allowedSquares.Add(400);
+                }
             }
             if (rank == 1)
             {
@@ -116,9 +124,16 @@ public static class GeneratePseudoLegal
                 if (MoveGenerator.IsEnemySquare(board, squareUpLeft, pieceColor))
                 {
                     _allowedSquares.Add(squareUpLeft);
+
+                    if (squareUpLeft / 8 == 7)
+                    {
+                        _allowedSquares.Add(100);
+                        _allowedSquares.Add(200);
+                        _allowedSquares.Add(300);
+                        _allowedSquares.Add(400);
+                    }
                 }
             }
-            
             if (file != 7)
             {
                 int squareUpRight = pieceIndex + 9;
@@ -126,6 +141,14 @@ public static class GeneratePseudoLegal
                 if (MoveGenerator.IsEnemySquare(board, squareUpRight, pieceColor))
                 {
                     _allowedSquares.Add(squareUpRight);
+
+                    if (squareUpRight / 8 == 7)
+                    {
+                        _allowedSquares.Add(100);
+                        _allowedSquares.Add(200);
+                        _allowedSquares.Add(300);
+                        _allowedSquares.Add(400);
+                    }
                 }
             }
         } else
@@ -203,10 +226,20 @@ public static class GeneratePseudoLegal
                 }
             }
 
-            bool moveOne = MoveGenerator.IsSquareFree(board, pieceIndex - 8);
+            int squareDown = pieceIndex - 8;
+
+            bool moveOne = MoveGenerator.IsSquareFree(board, squareDown);
             if (moveOne)
             {
-                _allowedSquares.Add(pieceIndex - 8);
+                _allowedSquares.Add(squareDown);
+
+                if (squareDown / 8 == 7)
+                    {
+                        _allowedSquares.Add(100);
+                        _allowedSquares.Add(200);
+                        _allowedSquares.Add(300);
+                        _allowedSquares.Add(400);
+                    }
             }
             
             if (rank == 6)
@@ -225,6 +258,14 @@ public static class GeneratePseudoLegal
                 if (MoveGenerator.IsEnemySquare(board, squareDownRight, pieceColor))
                 {
                     _allowedSquares.Add(squareDownRight);
+
+                    if (squareDownRight / 8 == 7)
+                    {
+                        _allowedSquares.Add(100);
+                        _allowedSquares.Add(200);
+                        _allowedSquares.Add(300);
+                        _allowedSquares.Add(400);
+                    }
                 }
             }
             
@@ -235,6 +276,14 @@ public static class GeneratePseudoLegal
                 if (MoveGenerator.IsEnemySquare(board, squareDownLeft, pieceColor))
                 {
                     _allowedSquares.Add(squareDownLeft);
+
+                    if (squareDownLeft / 8 == 7)
+                    {
+                        _allowedSquares.Add(100);
+                        _allowedSquares.Add(200);
+                        _allowedSquares.Add(300);
+                        _allowedSquares.Add(400);
+                    }
                 }
             }
         }

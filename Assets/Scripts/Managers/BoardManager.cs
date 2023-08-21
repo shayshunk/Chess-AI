@@ -10,6 +10,7 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private int _width, _height;
     [SerializeField] private Tile _tilePrefab;
     [SerializeField] private Transform _cam;
+    [SerializeField] private PromotionWindow promotionWindow;
 
     public Canvas gameCanvas;
     public Button rewindButton, forwardButton, skipLastButton, skipFirstButton;
@@ -25,6 +26,8 @@ public class BoardManager : MonoBehaviour
     public AudioSource soundPlayer;
     public AudioClip notify, capture, regularMove;
 
+    public bool isButtonClicked;
+
     // Game variables
     public bool playerWhite, AIenabled, whiteToMove, currentPlayerInCheck, checkmate;
     public int[] square;
@@ -34,8 +37,7 @@ public class BoardManager : MonoBehaviour
     public bool[] squaresAroundBlackKing;
     public bool[] squaresAroundWhiteKing;
 
-    public int whiteIndex = 0;
-    public int blackIndex = 1;
+    public int whiteIndex = 0, blackIndex = 1, promotionIndex;
 
     public int plyCount, fiftyMoveCounter, currentBoardHistoryIndex;
     public bool whiteToMoveStart, whiteToMoveEnd;
@@ -227,11 +229,56 @@ public class BoardManager : MonoBehaviour
         pieceListHistory = new Stack<List<int>>();
         plyCount = 0;
         fiftyMoveCounter = 0;
+        promotionIndex = 100;
     }
 
-    public void MakeMove(int pieceIndex, int newIndex)
+    private void Promotion()
     {
-        //Debug.Log("Make move called.");
+        isButtonClicked = false;
+        
+        promotionWindow.gameObject.SetActive(true);
+        promotionWindow.queenButton.onClick.AddListener(QueenPromotion);
+        promotionWindow.rookButton.onClick.AddListener(RookPromotion);
+        promotionWindow.bishopButton.onClick.AddListener(BishopPromotion);
+        promotionWindow.knightButton.onClick.AddListener(KnightPromotion);
+    }
+
+    private int GetPromotion()
+    {
+        return promotionIndex;
+    }
+
+    private void QueenPromotion()
+    {
+        promotionWindow.gameObject.SetActive(false);   
+        promotionIndex = 100;
+        isButtonClicked = true;
+    }
+
+    private void RookPromotion()
+    {
+        promotionWindow.gameObject.SetActive(false);   
+        promotionIndex = 200;
+        isButtonClicked = true;
+    }
+
+    private void BishopPromotion()
+    {
+        promotionWindow.gameObject.SetActive(false);   
+        promotionIndex = 300;
+        isButtonClicked = true;
+    }
+
+    private void KnightPromotion()
+    {
+        promotionWindow.gameObject.SetActive(false);   
+        promotionIndex = 400;
+        isButtonClicked = true;
+    }
+
+    public IEnumerator MakeMove(int pieceIndex, int newIndex)
+    {
+        Debug.Log("Make move called with: " + pieceIndex + " " + newIndex);
 
         int file = newIndex % 8;
         int rank = newIndex / 8;
@@ -240,6 +287,7 @@ public class BoardManager : MonoBehaviour
         int startRank = pieceIndex / 8;
 
         int piece = MainBoard.square[pieceIndex];
+        int pieceType = Piece.PieceType(piece);
 
         int pieceListIndex = MainBoard.pieceList.IndexOf(pieceIndex);
 
@@ -247,15 +295,26 @@ public class BoardManager : MonoBehaviour
         {
             GenerateGrid();
             DrawPieces();
-            return;
+            yield return null;
         }
 
         if (!MainBoard.allowedMoves[pieceListIndex].Contains(rank * 8 + file))
         {
             GenerateGrid();
             DrawPieces();
-            return;
+            yield return null;
         }
+
+        if (pieceType == Piece.Pawn && (rank == 7 || rank == 0))
+        {
+            Debug.Log("Getting promotion.");
+            Promotion();
+            while (!isButtonClicked)
+            {
+                yield return new WaitForSeconds(0.2f);
+            }
+        }
+
 
         MainBoard.MakeMove(pieceIndex, newIndex);
 
@@ -297,6 +356,8 @@ public class BoardManager : MonoBehaviour
         Debug.Log("Positions found: " + numPositions);
 
         TurnHandler();
+
+        yield return null;
     }
 
     public void TurnHandler()
