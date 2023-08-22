@@ -278,8 +278,6 @@ public class BoardManager : MonoBehaviour
 
     public IEnumerator MakeMove(int pieceIndex, int newIndex)
     {
-        Debug.Log("Make move called with: " + pieceIndex + " " + newIndex);
-
         int file = newIndex % 8;
         int rank = newIndex / 8;
 
@@ -288,6 +286,11 @@ public class BoardManager : MonoBehaviour
 
         int piece = MainBoard.square[pieceIndex];
         int pieceType = Piece.PieceType(piece);
+
+        if (pieceType == Piece.Pawn && (rank == 0 || rank == 7))
+        {
+            newIndex = newIndex + 100;
+        }
 
         int pieceListIndex = MainBoard.pieceList.IndexOf(pieceIndex);
 
@@ -298,7 +301,7 @@ public class BoardManager : MonoBehaviour
             yield return null;
         }
 
-        if (!MainBoard.allowedMoves[pieceListIndex].Contains(rank * 8 + file))
+        if (!MainBoard.allowedMoves[pieceListIndex].Contains(newIndex))
         {
             GenerateGrid();
             DrawPieces();
@@ -307,14 +310,13 @@ public class BoardManager : MonoBehaviour
 
         if (pieceType == Piece.Pawn && (rank == 7 || rank == 0))
         {
-            Debug.Log("Getting promotion.");
             Promotion();
             while (!isButtonClicked)
             {
                 yield return new WaitForSeconds(0.2f);
             }
+            newIndex = newIndex % 100;
         }
-
 
         MainBoard.MakeMove(pieceIndex, newIndex);
 
@@ -582,13 +584,13 @@ public class BoardManager : MonoBehaviour
             if (pieceIndex == -1)
                 continue;
             int piece = board.square[pieceIndex];
+            int pieceType = Piece.PieceType(piece);
 
             if (Piece.IsColor(piece, Piece.White) != board.whiteToMove)
                 continue;
 
             foreach (int move in moveList)
             {
-                //Debug.Log("Can move to: " + move);
                 List<int> tempPieceList = new List<int>(board.pieceList);
                 int[] tempSquare = new int[64];
                 int tempEP = board.epFile;
@@ -598,7 +600,38 @@ public class BoardManager : MonoBehaviour
                 bool blackCastleQueenside = board.blackCastleQueenside;
                 board.square.CopyTo(tempSquare, 0);
 
-                PseudoMakeMove(board, pieceIndex, move);
+                int newIndex;
+
+                if (move >= 100)
+                {
+                    newIndex = move % 100;
+                    int promotion = move / 100;
+
+                    switch (promotion)
+                    {
+                        case 1:
+                            promotionIndex = 100;
+                            break;
+                        case 2:
+                            promotionIndex = 200;
+                            break;
+                        case 3:
+                            promotionIndex = 300;
+                            break;
+                        case 4:
+                            promotionIndex = 400;
+                            break;
+                        default:
+                            promotionIndex = 0;
+                            break;
+                    }    
+                }
+                else
+                {
+                    newIndex = move;
+                }
+
+                PseudoMakeMove(board, pieceIndex, newIndex);
 
                 //Board newBoard = new Board(board.epFile, board.square, board.whiteToMove, board.whiteCastleKingside, board.whiteCastleQueenside, board.blackCastleKingside, board.blackCastleQueenside);
 
@@ -631,6 +664,7 @@ public class BoardManager : MonoBehaviour
         int startRank = pieceIndex / 8;
 
         int piece = tempBoard.square[pieceIndex];
+        int pieceType = Piece.PieceType(piece);
 
         int pieceListIndex = tempBoard.pieceList.IndexOf(pieceIndex);
 

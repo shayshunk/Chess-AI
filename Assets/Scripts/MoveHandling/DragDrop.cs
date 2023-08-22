@@ -58,8 +58,20 @@ public class DragDrop : MonoBehaviour
 
             foreach (int index in allowedSquares)
             {
-                int newRank = index / 8;
-                int newFile = index % 8;
+                int newIndex;
+
+                if (index >= 100)
+                {
+                    newIndex = index % 100;
+                }
+                else
+                {
+                    newIndex = index;
+                }
+
+                int newRank = newIndex / 8;
+                int newFile = newIndex % 8;
+
                 GameObject highlightCircle = Instantiate(Resources.Load("Circle") as GameObject, new Vector3(newFile, newRank, -2), Quaternion.identity);
                 highlightCircle.tag = "Circle";
                 highlightCircle.transform.SetParent(gameCanvas.transform, false);
@@ -89,7 +101,7 @@ public class DragDrop : MonoBehaviour
 
             int oldPos = rank * 8 + file;
             int newPos = newRank * 8 + newFile;
-
+            
             StartCoroutine(BoardManager.Instance.MakeMove(oldPos, newPos));
         }
     }

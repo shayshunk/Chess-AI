@@ -259,9 +259,11 @@ public class Board
         int pieceListIndex = pieceList.IndexOf(pieceIndex);
 
         int takenPieceIndex = -1;
-
-        if (rank * 8 + file > 63)
-            Debug.Log("Square of: " + (rank * 8 + file));
+        
+        if (newIndex >= 100)
+        {
+            newIndex = newIndex % 100;
+        }
         
         if (square[rank * 8 + file] != 0)
         {
@@ -279,10 +281,8 @@ public class Board
 
         if (pieceType == Piece.Pawn) 
         {
-            Debug.Log("Piece is pawn.");
             if (rank == 7 || rank == 0)
             {
-                Debug.Log("Piece is being promoted.");
                 if (BoardManager.Instance.promotionIndex == 100)
                     pieceType = Piece.Queen;
                 else if (BoardManager.Instance.promotionIndex == 200)

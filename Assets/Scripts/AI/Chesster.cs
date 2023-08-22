@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Chesster : MonoBehaviour
+public class Chesster
 {
     private bool _playerWhite;
     List<int[]> boardList;
