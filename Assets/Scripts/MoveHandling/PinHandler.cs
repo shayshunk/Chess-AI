@@ -4,12 +4,10 @@ using UnityEngine;
 
 public static class PinHandler
 {
-    static bool[] squaresAroundKing;
     static List<int> pinnedPieces, pinnedDirection;
     
-    public static bool[] GeneratePins(Board board)
+    public static void GeneratePins(Board board)
     {
-        squaresAroundKing = new bool[8];
         pinnedPieces = new List<int>();
         pinnedDirection = new List<int>();
 
@@ -58,7 +56,6 @@ public static class PinHandler
                     if (enemyPieceType == Piece.Rook || enemyPieceType == Piece.Queen)
                     {
                         foundFriendly = false;
-                        squaresAroundKing[1] = true;
                         pinnedPieces.Add(possiblePinned);
                         pinnedDirection.Add(8);
                         break;
@@ -114,7 +111,6 @@ public static class PinHandler
                     if (enemyPieceType == Piece.Rook || enemyPieceType == Piece.Queen)
                     {
                         foundFriendly = false;
-                        squaresAroundKing[3] = true;
                         pinnedPieces.Add(possiblePinned);
                         pinnedDirection.Add(1);
                         break;
@@ -170,7 +166,6 @@ public static class PinHandler
                     if (enemyPieceType == Piece.Rook || enemyPieceType == Piece.Queen)
                     {
                         foundFriendly = false;
-                        squaresAroundKing[4] = true;
                         pinnedPieces.Add(possiblePinned);
                         pinnedDirection.Add(1);
                         break;
@@ -219,7 +214,6 @@ public static class PinHandler
                     if (enemyPieceType == Piece.Rook || enemyPieceType == Piece.Queen)
                     {
                         foundFriendly = false;
-                        squaresAroundKing[6] = true;
                         pinnedPieces.Add(possiblePinned);
                         pinnedDirection.Add(8);
                         break;
@@ -273,7 +267,6 @@ public static class PinHandler
                     if (enemyPieceType == Piece.Bishop || enemyPieceType == Piece.Queen)
                     {
                         foundFriendly = false;
-                        squaresAroundKing[2] = true;
                         pinnedPieces.Add(possiblePinned);
                         pinnedDirection.Add(9);
                         break;
@@ -327,7 +320,6 @@ public static class PinHandler
                     if (enemyPieceType == Piece.Bishop || enemyPieceType == Piece.Queen)
                     {
                         foundFriendly = false;
-                        squaresAroundKing[0] = true;
                         pinnedPieces.Add(possiblePinned);
                         pinnedDirection.Add(7);
                         break;
@@ -381,7 +373,6 @@ public static class PinHandler
                     if (enemyPieceType == Piece.Bishop || enemyPieceType == Piece.Queen)
                     {
                         foundFriendly = false;
-                        squaresAroundKing[7] = true;
                         pinnedPieces.Add(possiblePinned);
                         pinnedDirection.Add(7);
                         break;
@@ -436,7 +427,6 @@ public static class PinHandler
                     if (enemyPieceType == Piece.Bishop || enemyPieceType == Piece.Queen)
                     {
                         foundFriendly = false;
-                        squaresAroundKing[5] = true;
                         pinnedPieces.Add(possiblePinned);
                         pinnedDirection.Add(9);
                         break;
@@ -468,8 +458,6 @@ public static class PinHandler
                 squareDownLeft -= 9;
             }
         }
-
-        return squaresAroundKing;
     }
 
     public static List<int> GetPins()

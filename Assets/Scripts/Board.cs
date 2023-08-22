@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 public class Board
 {
@@ -60,11 +61,6 @@ public class Board
         blackCastleKingside = blackKingCastle;
         blackCastleQueenside = blackQueenCastle;
         epFile = ep;
-
-        PinHandler.GeneratePins(this);
-        pinnedPieces = PinHandler.GetPins();
-        if (pinnedPieces.Count != 0)
-            pinnedDirection = PinHandler.GetPinDirections();
 
         GenerateAllAttackedSquares();
         IsInCheck();
@@ -180,7 +176,18 @@ public class Board
 
             foreach (int move in moveList)
             {
-                square[move] = piece;
+                int newIndex;
+
+                if (move >= 100)
+                {
+                    newIndex = move % 100;
+                }
+                else
+                {
+                    newIndex = move;
+                }
+
+                square[newIndex] = piece;
                 square[pieceList[pieceListIndex]] = 0;
                 int oldKingSquare = kingSquares[kingColor];
 
@@ -273,8 +280,8 @@ public class Board
         
         whiteToMove = !whiteToMove;
 
-        pinnedPieces.Clear();
-        pinnedDirection.Clear();
+        pinnedPieces = new List<int>();
+        pinnedDirection = new List<int>();
         
         int pieceColor = Piece.Color(piece);
         int pieceType = Piece.PieceType(piece);
@@ -318,14 +325,14 @@ public class Board
         {
             if (pieceColor == Piece.White)
             {
-                kingSquares[whiteIndex] = rank * 8 + file;
+                kingSquares[whiteIndex] = newIndex;
 
-                if (rank * 8 + file == 6 && whiteCastleKingside && square[7] == 14)
+                if (newIndex == 6 && whiteCastleKingside && square[7] == 14)
                 {
                     square[7] = 0;
                     square[5] = 14;
                 }
-                else if (rank * 8 + file == 2 && whiteCastleQueenside && square[0] == 14)
+                else if (newIndex == 2 && whiteCastleQueenside && square[0] == 14)
                 {
                     square[0] = 0;
                     square[3] = 14;
@@ -336,14 +343,14 @@ public class Board
             }
             else
             {
-                kingSquares[blackIndex] = rank * 8 + file;
+                kingSquares[blackIndex] = newIndex;
 
-                if (rank * 8 + file == 62 && blackCastleKingside && square[63] == 22)
+                if (newIndex == 62 && blackCastleKingside && square[63] == 22)
                 {
                     square[63] = 0;
                     square[61] = 22;
                 }
-                else if (rank * 8 + file == 58 && blackCastleQueenside && square[56] == 22)
+                else if (newIndex == 58 && blackCastleQueenside && square[56] == 22)
                 {
                     square[56] = 0;
                     square[59] = 22;
@@ -356,13 +363,13 @@ public class Board
 
         else if (pieceType == Piece.Rook)
         {
-            if (startRank * 8 + startFile == 0)
+            if (pieceIndex == 0)
                 whiteCastleQueenside = false;
-            else if (startRank * 8 + startFile == 7)
+            else if (pieceIndex == 7)
                 whiteCastleKingside = false;
-            else if (startRank * 8 + startFile == 56)
+            else if (pieceIndex == 56)
                 blackCastleQueenside = false;
-            else if (startRank * 8 + startFile == 63)
+            else if (pieceIndex == 63)
                 blackCastleKingside = false;
         }
 
@@ -389,20 +396,20 @@ public class Board
                     blackCastleKingside = false;
             }
             pieceList[takenPieceListIndex] = -1;
-
-            //Debug.Log("Piece at: " + takenPieceIndex + " was taken!");
         }
 
-        square[startRank * 8 + startFile] = 0;
-        square[rank * 8 + file] = piece;
+        square[pieceIndex] = 0;
+        square[newIndex] = piece;
 
         if (pieceListIndex != -1)
-            pieceList[pieceListIndex] = rank * 8 + file;
+            pieceList[pieceListIndex] = newIndex;
 
         PinHandler.GeneratePins(this);
         pinnedPieces = PinHandler.GetPins();
         if (pinnedPieces.Count != 0)
+        {
             pinnedDirection = PinHandler.GetPinDirections();
+        }
         
         GenerateAllAttackedSquares();
 

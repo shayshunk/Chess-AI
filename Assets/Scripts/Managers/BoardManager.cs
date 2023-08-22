@@ -39,7 +39,7 @@ public class BoardManager : MonoBehaviour
 
     public int whiteIndex = 0, blackIndex = 1, promotionIndex;
 
-    public int plyCount, fiftyMoveCounter, currentBoardHistoryIndex;
+    public int plyCount, fiftyMoveCounter, currentBoardHistoryIndex, depthTest;
     public bool whiteToMoveStart, whiteToMoveEnd;
     Stack<int> epFileHistory;
     Stack<int[]> boardHistory;
@@ -125,7 +125,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position4);
+        LoadPosition(FenUtility.position3);
     }
 
     public void LoadPosition(string fen)
@@ -159,7 +159,7 @@ public class BoardManager : MonoBehaviour
         Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
                                         MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
 
-        int numPositions = MoveGenerationTest(currentBoard, 2);
+        int numPositions = MoveGenerationTest(currentBoard, depthTest);
         Debug.Log("Positions found: " + numPositions);
     }
 
@@ -230,6 +230,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
+        depthTest = 2;
     }
 
     private void Promotion()
@@ -354,7 +355,7 @@ public class BoardManager : MonoBehaviour
         Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
                                         MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
 
-        int numPositions = MoveGenerationTest(currentBoard, 1);
+        int numPositions = MoveGenerationTest(currentBoard, depthTest - 1);
         Debug.Log("Positions found: " + numPositions);
 
         TurnHandler();
@@ -569,7 +570,9 @@ public class BoardManager : MonoBehaviour
     public int MoveGenerationTest(Board board, int depth)
     {
         if (depth == 0)
+        {
             return 1;
+        }
         
         int numPositions = 0;
 
@@ -593,12 +596,15 @@ public class BoardManager : MonoBehaviour
             {
                 List<int> tempPieceList = new List<int>(board.pieceList);
                 int[] tempSquare = new int[64];
+                int[] tempKing = new int[2];
                 int tempEP = board.epFile;
+
                 bool whiteCastleKingside = board.whiteCastleKingside;
                 bool whiteCastleQueenside = board.whiteCastleQueenside;
                 bool blackCastleKingside = board.blackCastleKingside;
                 bool blackCastleQueenside = board.blackCastleQueenside;
                 board.square.CopyTo(tempSquare, 0);
+                board.kingSquares.CopyTo(tempKing, 0);
 
                 int newIndex;
 
@@ -639,12 +645,14 @@ public class BoardManager : MonoBehaviour
 
                 board.pieceList = tempPieceList;
                 board.square = tempSquare;
+                board.kingSquares = tempKing;
                 board.whiteToMove = !board.whiteToMove;
                 board.epFile = tempEP;
                 board.whiteCastleKingside = whiteCastleKingside;
                 board.whiteCastleQueenside = whiteCastleQueenside;
                 board.blackCastleKingside = blackCastleKingside;
                 board.blackCastleQueenside = blackCastleQueenside;
+
                 board.GenerateAllAttackedSquares();
                 board.IsInCheck();
 
