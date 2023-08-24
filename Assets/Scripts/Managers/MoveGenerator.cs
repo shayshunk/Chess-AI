@@ -181,25 +181,6 @@ public static class MoveGenerator
 
             if (isPinned)
             {
-                int posPinnedDir = pinnedDir;
-                int negPinnedDir = -1 * posPinnedDir;
-                int posIterator = posPinnedDir;
-
-                int posSquare = posPinnedDir + pieceIndex;
-                int negSquare = negPinnedDir + pieceIndex;
-
-                while (posSquare <= 63)
-                {
-                    pinMoveCalc.Add(posSquare);
-                    posSquare += posIterator;
-                }
-
-                while (negSquare >= 0)
-                {
-                    pinMoveCalc.Add(negSquare);
-                    negSquare -= posIterator;
-                }
-
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
             }
         }
