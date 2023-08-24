@@ -106,14 +106,14 @@ public class BoardManager : MonoBehaviour
                     if (x == file && y == rank)
                         spawnedTile.Check();
                 }
-                if (MainBoard.attackedSquares.Contains(y * 8 + x))
+                /*if (MainBoard.attackedSquares.Contains(y * 8 + x))
                 {
                     var highlightTile = Instantiate(_tilePrefab, new Vector3(x, y), Quaternion.identity);
                     highlightTile.tag = "Tile";
                     highlightTile.GetComponent<SpriteRenderer>().sortingLayerName = "Highlight Tile";
                     highlightTile.transform.SetParent(gameCanvas.transform, false);
                     highlightTile.Attacked();
-                }
+                }*/
             }
         }
     }
@@ -125,7 +125,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position7);
+        LoadPosition(FenUtility.position4);
     }
 
     public void LoadPosition(string fen)
@@ -238,7 +238,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 3;
+        depthTest = 2;
     }
 
     private void Promotion()

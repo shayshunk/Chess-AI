@@ -80,12 +80,32 @@ public static class MoveGenerator
                 {
                     pinMoveCalc.Add(posSquare);
                     posSquare += posIterator;
+
+                    if (IsEnemySquare(board, posSquare, pieceColor))
+                    {
+                        pinMoveCalc.Add(posSquare);
+                        break;
+                    }
+                    else if (!IsSquareFree(board, posSquare))
+                    {
+                        break;
+                    }
                 }
 
                 while (negSquare >= 0 && canMove)
                 {
                     pinMoveCalc.Add(negSquare);
                     negSquare -= posIterator;
+
+                    if (IsEnemySquare(board, negSquare, pieceColor))
+                    {
+                        pinMoveCalc.Add(negSquare);
+                        break;
+                    }
+                    else if (!IsSquareFree(board, negSquare))
+                    {
+                        break;
+                    }
                 }
 
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
@@ -115,7 +135,12 @@ public static class MoveGenerator
                     pinMoveCalc.Add(posSquare);
                     posSquare += posIterator;
 
-                    if (IsEnemySquare(board, posSquare, pieceColor) || !IsSquareFree(board, posSquare))
+                    if (IsEnemySquare(board, posSquare, pieceColor))
+                    {
+                        pinMoveCalc.Add(posSquare);
+                        break;
+                    }
+                    else if (!IsSquareFree(board, posSquare))
                     {
                         break;
                     }
@@ -126,7 +151,12 @@ public static class MoveGenerator
                     pinMoveCalc.Add(negSquare);
                     negSquare -= posIterator;
 
-                    if (IsEnemySquare(board, negSquare, pieceColor) || !IsSquareFree(board, negSquare))
+                    if (IsEnemySquare(board, negSquare, pieceColor))
+                    {
+                        pinMoveCalc.Add(negSquare);
+                        break;
+                    }
+                    else if (!IsSquareFree(board, negSquare))
                     {
                         break;
                     }
@@ -154,7 +184,12 @@ public static class MoveGenerator
                     pinMoveCalc.Add(posSquare);
                     posSquare += posIterator;
 
-                    if (IsEnemySquare(board, posSquare, pieceColor) || !IsSquareFree(board, posSquare))
+                    if (IsEnemySquare(board, posSquare, pieceColor))
+                    {
+                        pinMoveCalc.Add(posSquare);
+                        break;
+                    }
+                    else if (!IsSquareFree(board, posSquare))
                     {
                         break;
                     }
@@ -165,7 +200,12 @@ public static class MoveGenerator
                     pinMoveCalc.Add(negSquare);
                     negSquare -= posIterator;
 
-                    if (IsEnemySquare(board, negSquare, pieceColor) || !IsSquareFree(board, negSquare))
+                    if (IsEnemySquare(board, negSquare, pieceColor))
+                    {
+                        pinMoveCalc.Add(negSquare);
+                        break;
+                    }
+                    else if (!IsSquareFree(board, negSquare))
                     {
                         break;
                     }

@@ -282,9 +282,9 @@ public class Board
             newIndex = newIndex % 100;
         }
         
-        if (square[rank * 8 + file] != 0)
+        if (square[newIndex] != 0)
         {
-            takenPieceIndex = rank * 8 + file;
+            takenPieceIndex = newIndex;
             clipToPlay = BoardManager.Instance.capture;
         }
         
@@ -314,13 +314,26 @@ public class Board
             {
                 if (startRank == 4 && pieceColor == Piece.White)
                 {
-                    square[startRank * 8 + epFile] = 0;
                     takenPieceIndex = startRank * 8 + epFile;
+                    if (pieceList.IndexOf(takenPieceIndex) == -1)
+                    {
+                        Debug.Log("Some white EP problem.");
+                    }
+                    square[startRank * 8 + epFile] = 0;
                 }
                 else if (startRank == 3 && pieceColor == Piece.Black)
                 {
-                    square[startRank * 8 + epFile] = 0;
                     takenPieceIndex = startRank * 8 + epFile;
+                    if (pieceList.IndexOf(takenPieceIndex) == -1)
+                    {
+                        Debug.Log("Piece is at : " + pieceIndex);
+                        Debug.Log("Square of: " + square[pieceIndex]);
+                        Debug.Log("Trying to take: " + newIndex + ", which has: " + square[newIndex]);
+                        Debug.Log("Some black EP problem.");
+                        Debug.Log("EP was on file: " + epFile);
+                        Debug.Log("Square at: " + square[startRank * 8 + epFile]);
+                    }
+                    square[startRank * 8 + epFile] = 0;
                 }
             }
 
@@ -330,8 +343,12 @@ public class Board
                 epFile = 88;
 
         }
+        else
+        {
+            epFile = 88;
+        }
 
-        else if (pieceType == Piece.King)
+        if (pieceType == Piece.King)
         {
             if (pieceColor == Piece.White)
             {
@@ -391,16 +408,18 @@ public class Board
                 blackCastleKingside = false;
         }
 
-        else
-        {
-            epFile = 88;
-        }
 
         piece = pieceType | pieceColor;
 
         if (takenPieceIndex != -1)
         {
             int takenPieceListIndex = pieceList.IndexOf(takenPieceIndex);
+
+            if (takenPieceListIndex == -1)
+            {
+                Debug.Log("Taken piece index was: " + takenPieceIndex);
+                Debug.Log("Square was: " + square[takenPieceIndex]);
+            }
 
             if (Piece.PieceType(square[pieceList[takenPieceListIndex]]) == Piece.Rook)
             {
