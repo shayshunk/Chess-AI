@@ -315,24 +315,11 @@ public class Board
                 if (startRank == 4 && pieceColor == Piece.White)
                 {
                     takenPieceIndex = startRank * 8 + epFile;
-                    if (pieceList.IndexOf(takenPieceIndex) == -1)
-                    {
-                        Debug.Log("Some white EP problem.");
-                    }
                     square[startRank * 8 + epFile] = 0;
                 }
                 else if (startRank == 3 && pieceColor == Piece.Black)
                 {
                     takenPieceIndex = startRank * 8 + epFile;
-                    if (pieceList.IndexOf(takenPieceIndex) == -1)
-                    {
-                        Debug.Log("Piece is at : " + pieceIndex);
-                        Debug.Log("Square of: " + square[pieceIndex]);
-                        Debug.Log("Trying to take: " + newIndex + ", which has: " + square[newIndex]);
-                        Debug.Log("Some black EP problem.");
-                        Debug.Log("EP was on file: " + epFile);
-                        Debug.Log("Square at: " + square[startRank * 8 + epFile]);
-                    }
                     square[startRank * 8 + epFile] = 0;
                 }
             }
@@ -354,14 +341,14 @@ public class Board
             {
                 kingSquares[whiteIndex] = newIndex;
 
-                if (newIndex == 6 && square[7] == 14)
+                if (pieceIndex == 4 && newIndex == 6 && square[7] == 14)
                 {
                     square[7] = 0;
                     square[5] = 14;
                     int oldRookIndex = pieceList.IndexOf(7);
                     pieceList[oldRookIndex] = 5;
                 }
-                else if (newIndex == 2 && square[0] == 14)
+                else if (pieceIndex == 4 &&newIndex == 2 && square[0] == 14)
                 {
                     square[0] = 0;
                     square[3] = 14;
@@ -376,14 +363,14 @@ public class Board
             {
                 kingSquares[blackIndex] = newIndex;
 
-                if (newIndex == 62 && square[63] == 22)
+                if (pieceIndex == 60 && newIndex == 62 && square[63] == 22)
                 {
                     square[63] = 0;
                     square[61] = 22;
                     int oldRookIndex = pieceList.IndexOf(63);
                     pieceList[oldRookIndex] = 61;
                 }
-                else if (newIndex == 58 && square[56] == 22)
+                else if (pieceIndex == 60 && newIndex == 58 && square[56] == 22)
                 {
                     square[56] = 0;
                     square[59] = 22;

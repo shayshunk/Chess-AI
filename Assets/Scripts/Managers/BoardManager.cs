@@ -118,58 +118,6 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void LoadStartPosition()
-    {
-        rewindButton.interactable = false;
-        forwardButton.interactable = false;
-        skipFirstButton.interactable = false;
-        skipLastButton.interactable = false;
-
-        LoadPosition(FenUtility.position4);
-    }
-
-    public void LoadPosition(string fen)
-    {   
-        Initialize();
-
-        var loadedPosition = FenUtility.PositionFromFen(fen);
-
-        MainBoard = new Board(loadedPosition.epFile, loadedPosition.squares, loadedPosition.whiteToMove, loadedPosition.whiteCastleKingside, 
-                            loadedPosition.whiteCastleQueenside, loadedPosition.blackCastleKingside, loadedPosition.blackCastleQueenside);
-
-        whiteToMoveStart = MainBoard.whiteToMove;
-        
-        Debug.Log("White to move? " + MainBoard.whiteToMove);
-
-        if (!playerWhite)
-            System.Array.Reverse(MainBoard.square);
-
-        boardHistory.Push(MainBoard.square.Clone() as int[]);
-        List<int> tempPieceList = new List<int>(MainBoard.pieceList);
-        pieceListHistory.Push(tempPieceList);
-        currentBoardHistoryIndex = 0;
-
-        epFileHistory.Push(MainBoard.epFile);
-
-        int[] highlightArr = new int[2];
-        highlightArr[0] = 100;
-        highlightArr[1] = 100;
-        highlightHistory.Push(highlightArr.Clone() as int[]);
-
-        bool[] castleArr = new bool[4];
-        castleArr[0] = MainBoard.whiteCastleKingside;
-        castleArr[1] = MainBoard.whiteCastleQueenside;
-        castleArr[2] = MainBoard.blackCastleKingside;
-        castleArr[3] = MainBoard.blackCastleQueenside;
-        castleHistory.Push(castleArr.Clone() as bool[]);
-
-        Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
-                                        MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
-
-        int numPositions = MoveGenerationTest(currentBoard, depthTest);
-        Debug.Log("Positions found: " + numPositions);
-    }
-
     public void DrawPieces()
     {
         _pieceObjects = GameObject.FindGameObjectsWithTag("Piece");
@@ -225,6 +173,59 @@ public class BoardManager : MonoBehaviour
         return pieceSprite;
     }
 
+    public void LoadStartPosition()
+    {
+        rewindButton.interactable = false;
+        forwardButton.interactable = false;
+        skipFirstButton.interactable = false;
+        skipLastButton.interactable = false;
+
+        LoadPosition(FenUtility.position9);
+    }
+
+    public void LoadPosition(string fen)
+    {   
+        Initialize();
+
+        var loadedPosition = FenUtility.PositionFromFen(fen);
+
+        MainBoard = new Board(loadedPosition.epFile, loadedPosition.squares, loadedPosition.whiteToMove, loadedPosition.whiteCastleKingside, 
+                            loadedPosition.whiteCastleQueenside, loadedPosition.blackCastleKingside, loadedPosition.blackCastleQueenside);
+
+        whiteToMoveStart = MainBoard.whiteToMove;
+        
+        Debug.Log("White to move? " + MainBoard.whiteToMove);
+
+        if (!playerWhite)
+            System.Array.Reverse(MainBoard.square);
+
+        boardHistory.Push(MainBoard.square.Clone() as int[]);
+        List<int> tempPieceList = new List<int>(MainBoard.pieceList);
+        pieceListHistory.Push(tempPieceList);
+        currentBoardHistoryIndex = 0;
+
+        epFileHistory.Push(MainBoard.epFile);
+
+        int[] highlightArr = new int[2];
+        highlightArr[0] = 100;
+        highlightArr[1] = 100;
+        highlightHistory.Push(highlightArr.Clone() as int[]);
+
+        bool[] castleArr = new bool[4];
+        castleArr[0] = MainBoard.whiteCastleKingside;
+        castleArr[1] = MainBoard.whiteCastleQueenside;
+        castleArr[2] = MainBoard.blackCastleKingside;
+        castleArr[3] = MainBoard.blackCastleQueenside;
+        castleHistory.Push(castleArr.Clone() as bool[]);
+
+        Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
+                                        MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
+
+        int numPositions = MoveGenerationTest(currentBoard, depthTest);
+        Debug.Log("Positions found: " + numPositions);
+    }
+
+
     void Initialize()
     {
         playerWhite = true;
@@ -238,7 +239,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 2;
+        depthTest = 5;
     }
 
     private void Promotion()
