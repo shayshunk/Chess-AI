@@ -79,7 +79,6 @@ public static class MoveGenerator
                 while (posSquare <= 63 && canMove)
                 {
                     pinMoveCalc.Add(posSquare);
-                    posSquare += posIterator;
 
                     if (IsEnemySquare(board, posSquare, pieceColor))
                     {
@@ -90,12 +89,13 @@ public static class MoveGenerator
                     {
                         break;
                     }
+                    
+                    posSquare += posIterator;
                 }
 
                 while (negSquare >= 0 && canMove)
                 {
                     pinMoveCalc.Add(negSquare);
-                    negSquare -= posIterator;
 
                     if (IsEnemySquare(board, negSquare, pieceColor))
                     {
@@ -106,6 +106,8 @@ public static class MoveGenerator
                     {
                         break;
                     }
+                    
+                    negSquare -= posIterator;
                 }
 
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
@@ -133,7 +135,6 @@ public static class MoveGenerator
                 while (posSquare <= 63 && canMove)
                 {
                     pinMoveCalc.Add(posSquare);
-                    posSquare += posIterator;
 
                     if (IsEnemySquare(board, posSquare, pieceColor))
                     {
@@ -144,12 +145,13 @@ public static class MoveGenerator
                     {
                         break;
                     }
+
+                    posSquare += posIterator;
                 }
 
                 while (negSquare >= 0 && canMove)
                 {
                     pinMoveCalc.Add(negSquare);
-                    negSquare -= posIterator;
 
                     if (IsEnemySquare(board, negSquare, pieceColor))
                     {
@@ -160,6 +162,8 @@ public static class MoveGenerator
                     {
                         break;
                     }
+
+                    negSquare -= posIterator;
                 }
 
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
@@ -182,7 +186,6 @@ public static class MoveGenerator
                 while (posSquare <= 63)
                 {
                     pinMoveCalc.Add(posSquare);
-                    posSquare += posIterator;
 
                     if (IsEnemySquare(board, posSquare, pieceColor))
                     {
@@ -193,12 +196,13 @@ public static class MoveGenerator
                     {
                         break;
                     }
+                    
+                    posSquare += posIterator;
                 }
 
                 while (negSquare >= 0)
                 {
                     pinMoveCalc.Add(negSquare);
-                    negSquare -= posIterator;
 
                     if (IsEnemySquare(board, negSquare, pieceColor))
                     {
@@ -209,6 +213,8 @@ public static class MoveGenerator
                     {
                         break;
                     }
+                    
+                    negSquare -= posIterator;
                 }
 
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();

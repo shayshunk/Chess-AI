@@ -180,7 +180,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position9);
+        LoadPosition(FenUtility.position14);
     }
 
     public void LoadPosition(string fen)
@@ -239,7 +239,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 5;
+        depthTest = 4;
     }
 
     private void Promotion()

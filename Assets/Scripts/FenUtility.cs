@@ -19,6 +19,9 @@ public static class FenUtility
     public const string position9 = "4k3/8/8/8/8/8/8/R3K3 w Q - 0 1 ";
     public const string position10 = "8/1n4N1/2k5/8/8/5K2/1N4n1/8 b - - 0 1";
     public const string position11 = "8/2k1p3/3pP3/3P2K1/8/8/8/8 b - - 0 1 ";
+    public const string position12 = "3k4/3pp3/8/8/8/8/3PP3/3K4 w - - 0 1 ";
+    public const string position13 = "n1n5/1Pk5/8/8/8/8/5Kp1/5N1N w - - 0 1 ";
+    public const string position14 = "r3k2r/8/8/8/8/8/8/2R1K2R b Kkq - 0 1 ";
 
     public static LoadedPositionInfo PositionFromFen(string fen)
     {
