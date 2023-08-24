@@ -337,15 +337,19 @@ public class Board
             {
                 kingSquares[whiteIndex] = newIndex;
 
-                if (newIndex == 6 && whiteCastleKingside && square[7] == 14)
+                if (newIndex == 6 && square[7] == 14)
                 {
                     square[7] = 0;
                     square[5] = 14;
+                    int oldRookIndex = pieceList.IndexOf(7);
+                    pieceList[oldRookIndex] = 5;
                 }
-                else if (newIndex == 2 && whiteCastleQueenside && square[0] == 14)
+                else if (newIndex == 2 && square[0] == 14)
                 {
                     square[0] = 0;
                     square[3] = 14;
+                    int oldRookIndex = pieceList.IndexOf(0);
+                    pieceList[oldRookIndex] = 3;
                 }
 
                 whiteCastleKingside = false;
@@ -355,15 +359,19 @@ public class Board
             {
                 kingSquares[blackIndex] = newIndex;
 
-                if (newIndex == 62 && blackCastleKingside && square[63] == 22)
+                if (newIndex == 62 && square[63] == 22)
                 {
                     square[63] = 0;
                     square[61] = 22;
+                    int oldRookIndex = pieceList.IndexOf(63);
+                    pieceList[oldRookIndex] = 61;
                 }
-                else if (newIndex == 58 && blackCastleQueenside && square[56] == 22)
+                else if (newIndex == 58 && square[56] == 22)
                 {
                     square[56] = 0;
                     square[59] = 22;
+                    int oldRookIndex = pieceList.IndexOf(56);
+                    pieceList[oldRookIndex] = 59;
                 }
 
                 blackCastleKingside = false;

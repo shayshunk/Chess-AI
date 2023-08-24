@@ -238,7 +238,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 1;
+        depthTest = 2;
     }
 
     private void Promotion()
