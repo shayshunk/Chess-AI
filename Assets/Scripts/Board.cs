@@ -62,6 +62,13 @@ public class Board
         blackCastleQueenside = blackQueenCastle;
         epFile = ep;
 
+        PinHandler.GeneratePins(this);
+        pinnedPieces = PinHandler.GetPins();
+        if (pinnedPieces.Count != 0)
+        {
+            pinnedDirection = PinHandler.GetPinDirections();
+        }
+
         GenerateAllAttackedSquares();
         IsInCheck();
 
@@ -74,7 +81,10 @@ public class Board
 
         if (allowedMoves.Count == 0)
         {
-            GenerateAllAttackedSquares();
+            if (attackedSquares.Count == 0)
+            {
+                GenerateAllAttackedSquares();
+            }
 
             for (int i = 0; i < length; i++)
             {

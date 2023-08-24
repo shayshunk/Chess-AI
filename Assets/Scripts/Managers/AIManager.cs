@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Evaluator))]
+//[RequireComponent(typeof(Evaluator))]
 
 public class AIManager : MonoBehaviour
 {

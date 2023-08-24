@@ -98,7 +98,7 @@ public static class PinHandler
                 foundFriendly = false;
                 break;
             }
-            
+
             moveLeft = MoveGenerator.IsSquareFree(board, squareLeft);
             enemyLeft = MoveGenerator.IsEnemySquare(board, squareLeft, pieceColor);
             

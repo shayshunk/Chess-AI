@@ -32,10 +32,11 @@ public static class GeneratePseudoLegal
                     int pieceRight = board.square[squareRight];
                     int pieceRightType = Piece.PieceType(pieceRight);
                     int pieceRightColor = Piece.Color(pieceRight);
+                    int piece = board.square[pieceIndex];
 
                     int[] tempSquares = new int[64];
+                    List<int> tempAttacked = new List<int>(board.attackedSquares);
                     bool tempCheck = board.currentPlayerInCheck;
-                    int piece = board.square[pieceIndex];
 
                     board.square.CopyTo(tempSquares, 0);
 
@@ -56,8 +57,9 @@ public static class GeneratePseudoLegal
                         }
                     }
 
-                    board.currentPlayerInCheck = tempCheck;
                     tempSquares.CopyTo(board.square, 0);
+                    board.attackedSquares = tempAttacked;
+                    board.currentPlayerInCheck = tempCheck;
                 }
             }
             else if (file == board.epFile + 1)
@@ -68,10 +70,11 @@ public static class GeneratePseudoLegal
                     int pieceLeft = board.square[squareLeft];
                     int pieceLeftType = Piece.PieceType(pieceLeft);
                     int pieceLeftColor = Piece.Color(pieceLeft);
+                    int piece = board.square[pieceIndex];
 
                     int[] tempSquares = new int[64];
+                    List<int> tempAttacked = new List<int>(board.attackedSquares);
                     bool tempCheck = board.currentPlayerInCheck;
-                    int piece = board.square[pieceIndex];
 
                     board.square.CopyTo(tempSquares, 0);
 
@@ -92,8 +95,9 @@ public static class GeneratePseudoLegal
                         }
                     }
 
-                    board.currentPlayerInCheck = tempCheck;
                     tempSquares.CopyTo(board.square, 0);
+                    board.attackedSquares = tempAttacked;
+                    board.currentPlayerInCheck = tempCheck;
                 }
             }
             if (moveOne)
@@ -170,10 +174,11 @@ public static class GeneratePseudoLegal
                     int pieceRight = board.square[squareRight];
                     int pieceRightType = Piece.PieceType(pieceRight);
                     int pieceRightColor = Piece.Color(pieceRight);
+                    int piece = board.square[pieceIndex];
 
                     int[] tempSquares = new int[64];
+                    List<int> tempAttacked = new List<int>(board.attackedSquares);
                     bool tempCheck = board.currentPlayerInCheck;
-                    int piece = board.square[pieceIndex];
 
                     board.square.CopyTo(tempSquares, 0);
 
@@ -194,8 +199,9 @@ public static class GeneratePseudoLegal
                         }
                     }
 
-                    board.currentPlayerInCheck = tempCheck;
                     tempSquares.CopyTo(board.square, 0);
+                    board.attackedSquares = tempAttacked;
+                    board.currentPlayerInCheck = tempCheck;
                 }
             }
             else if (file == board.epFile + 1)
@@ -206,10 +212,11 @@ public static class GeneratePseudoLegal
                     int pieceLeft = board.square[squareLeft];
                     int pieceLeftType = Piece.PieceType(pieceLeft);
                     int pieceLeftColor = Piece.Color(pieceLeft);
+                    int piece = board.square[pieceIndex];
 
                     int[] tempSquares = new int[64];
+                    List<int> tempAttacked = new List<int>(board.attackedSquares);
                     bool tempCheck = board.currentPlayerInCheck;
-                    int piece = board.square[pieceIndex];
 
                     board.square.CopyTo(tempSquares, 0);
 
@@ -230,8 +237,9 @@ public static class GeneratePseudoLegal
                         }
                     }
 
-                    board.currentPlayerInCheck = tempCheck;
                     tempSquares.CopyTo(board.square, 0);
+                    board.attackedSquares = tempAttacked;
+                    board.currentPlayerInCheck = tempCheck;
                 }
             }
 
@@ -556,8 +564,7 @@ public static class GeneratePseudoLegal
 
     public static List<int> GenerateRookPseudoLegal(Board board, int pieceIndex, int pieceColor)
     {
-        _allowedSquares = new List<int>();
-        _attackedSquares = new List<int>();
+        ResetLists();
 
         int squareUp = pieceIndex + 8;
         int squareLeft = pieceIndex - 1;
@@ -625,13 +632,19 @@ public static class GeneratePseudoLegal
 
             if (moveRight || enemyRight)
             {
+                //if (squareRight / 8 == 3)
+                    //Debug.Log("Square at: " + squareRight + " is either free or enemy.");
+
                 _allowedSquares.Add(squareRight);
                 _attackedSquares.Add(squareRight);
 
                 squareRight += 1;
                 
                 if (enemyRight)
+                {
+                    //Debug.Log("Enemy at: " + squareRight + ". Breaking.");
                     break;
+                }
             } else
             {
                 _attackedSquares.Add(squareRight);
