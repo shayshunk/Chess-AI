@@ -42,8 +42,8 @@ public class BoardManager : MonoBehaviour
     public int plyCount, fiftyMoveCounter, currentBoardHistoryIndex, depthTest;
     public bool whiteToMoveStart, whiteToMoveEnd;
     Stack<int> epFileHistory;
-    Stack<int[]> boardHistory;
-    Stack<int[]> highlightHistory;
+    Stack<int[]> boardHistory, highlightHistory;
+    Stack<bool[]> castleHistory;
     Stack<List<int>> pieceListHistory;
 
     public bool whiteCastleKingside, whiteCastleQueenside, blackCastleKingside, blackCastleQueenside;
@@ -125,7 +125,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position7);
+        LoadPosition(FenUtility.position8);
     }
 
     public void LoadPosition(string fen)
@@ -155,6 +155,13 @@ public class BoardManager : MonoBehaviour
         highlightArr[0] = 100;
         highlightArr[1] = 100;
         highlightHistory.Push(highlightArr.Clone() as int[]);
+
+        bool[] castleArr = new bool[4];
+        castleArr[0] = MainBoard.whiteCastleKingside;
+        castleArr[1] = MainBoard.whiteCastleQueenside;
+        castleArr[2] = MainBoard.blackCastleKingside;
+        castleArr[3] = MainBoard.blackCastleQueenside;
+        castleHistory.Push(castleArr.Clone() as bool[]);
 
         Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
                                         MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
@@ -226,11 +233,12 @@ public class BoardManager : MonoBehaviour
         epFileHistory = new Stack<int>();
         boardHistory = new Stack<int[]>();
         highlightHistory = new Stack<int[]>();
+        castleHistory = new Stack<bool[]>();
         pieceListHistory = new Stack<List<int>>();
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 2;
+        depthTest = 1;
     }
 
     private void Promotion()
@@ -338,6 +346,8 @@ public class BoardManager : MonoBehaviour
             boardHistory.Pop();
             pieceListHistory.Pop();
             highlightHistory.Pop();
+            castleHistory.Pop();
+            epFileHistory.Pop();
             currentBoardHistoryIndex--;
         }
 
@@ -351,6 +361,13 @@ public class BoardManager : MonoBehaviour
         highlightArr[0] = startRank * 8 + startFile;
         highlightArr[1] = rank * 8 + file;
         highlightHistory.Push(highlightArr.Clone() as int[]);
+
+        bool[] castleArr = new bool[4];
+        castleArr[0] = MainBoard.whiteCastleKingside;
+        castleArr[1] = MainBoard.whiteCastleQueenside;
+        castleArr[2] = MainBoard.blackCastleKingside;
+        castleArr[3] = MainBoard.blackCastleQueenside;
+        castleHistory.Push(castleArr.Clone() as bool[]);
 
         Board currentBoard = new Board(MainBoard.epFile, MainBoard.square, MainBoard.whiteToMove, MainBoard.whiteCastleKingside, 
                                         MainBoard.whiteCastleQueenside, MainBoard.blackCastleKingside, MainBoard.blackCastleQueenside);
@@ -415,6 +432,11 @@ public class BoardManager : MonoBehaviour
         MainBoard.kingSquares[whiteIndex] = Array.IndexOf(MainBoard.square, 9);
         MainBoard.kingSquares[blackIndex] = Array.IndexOf(MainBoard.square, 17);
 
+        MainBoard.whiteCastleKingside = castleHistory.ElementAt(currentBoardHistoryIndex + 1)[0];
+        MainBoard.whiteCastleQueenside = castleHistory.ElementAt(currentBoardHistoryIndex + 1)[1];
+        MainBoard.blackCastleKingside = castleHistory.ElementAt(currentBoardHistoryIndex + 1)[2];
+        MainBoard.blackCastleQueenside = castleHistory.ElementAt(currentBoardHistoryIndex + 1)[3];
+
         MainBoard.whiteToMove = !MainBoard.whiteToMove;
 
         PinHandler.GeneratePins(MainBoard);
@@ -457,6 +479,11 @@ public class BoardManager : MonoBehaviour
 
         MainBoard.kingSquares[whiteIndex] = Array.IndexOf(MainBoard.square, 9);
         MainBoard.kingSquares[blackIndex] = Array.IndexOf(MainBoard.square, 17);
+
+        MainBoard.whiteCastleKingside = castleHistory.ElementAt(currentBoardHistoryIndex - 1)[0];
+        MainBoard.whiteCastleQueenside = castleHistory.ElementAt(currentBoardHistoryIndex - 1)[1];
+        MainBoard.blackCastleKingside = castleHistory.ElementAt(currentBoardHistoryIndex - 1)[2];
+        MainBoard.blackCastleQueenside = castleHistory.ElementAt(currentBoardHistoryIndex - 1)[3];
 
         MainBoard.whiteToMove = !MainBoard.whiteToMove;
 
@@ -503,6 +530,15 @@ public class BoardManager : MonoBehaviour
         MainBoard.kingSquares[whiteIndex] = Array.IndexOf(MainBoard.square, 9);
         MainBoard.kingSquares[blackIndex] = Array.IndexOf(MainBoard.square, 17);
 
+        bool[] histoB = new bool[4];
+
+        histoB = castleHistory.ElementAt(length - 1);
+
+        MainBoard.whiteCastleKingside = castleHistory.ElementAt(length - 1)[0];
+        MainBoard.whiteCastleQueenside = castleHistory.ElementAt(length - 1)[1];
+        MainBoard.blackCastleKingside = castleHistory.ElementAt(length - 1)[2];
+        MainBoard.blackCastleQueenside = castleHistory.ElementAt(length - 1)[3];
+
         MainBoard.whiteToMove = whiteToMoveStart;
 
         PinHandler.GeneratePins(MainBoard);
@@ -542,6 +578,11 @@ public class BoardManager : MonoBehaviour
 
         MainBoard.kingSquares[whiteIndex] = Array.IndexOf(MainBoard.square, 9);
         MainBoard.kingSquares[blackIndex] = Array.IndexOf(MainBoard.square, 17);
+
+        MainBoard.whiteCastleKingside = castleHistory.ElementAt(0)[0];
+        MainBoard.whiteCastleQueenside = castleHistory.ElementAt(0)[1];
+        MainBoard.blackCastleKingside = castleHistory.ElementAt(0)[2];
+        MainBoard.blackCastleQueenside = castleHistory.ElementAt(0)[3];
 
         MainBoard.whiteToMove = whiteToMoveEnd;
 
@@ -583,7 +624,7 @@ public class BoardManager : MonoBehaviour
         {
             int pieceListIndex = allowedMoves.IndexOf(moveList);
             int pieceIndex = board.pieceList[pieceListIndex];
-            //Debug.Log("For piece at: " + board.pieceList[pieceListIndex]);
+
             if (pieceIndex == -1)
                 continue;
             int piece = board.square[pieceIndex];
