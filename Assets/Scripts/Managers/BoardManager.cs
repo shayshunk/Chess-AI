@@ -290,6 +290,8 @@ public class BoardManager : MonoBehaviour
 
     public IEnumerator MakeMove(int pieceIndex, int newIndex)
     {
+        AudioClip clipToPlay = regularMove;
+
         int file = newIndex % 8;
         int rank = newIndex / 8;
 
@@ -298,6 +300,11 @@ public class BoardManager : MonoBehaviour
 
         int piece = MainBoard.square[pieceIndex];
         int pieceType = Piece.PieceType(piece);
+
+        if (MainBoard.square[newIndex] != 0)
+        {
+            clipToPlay = capture;
+        }
 
         if (pieceType == Piece.Pawn && (rank == 0 || rank == 7))
         {
@@ -331,13 +338,17 @@ public class BoardManager : MonoBehaviour
         }
 
         MainBoard.MakeMove(pieceIndex, newIndex);
+        
+        if (MainBoard.currentPlayerInCheck)
+            clipToPlay = notify;
+
 
         whiteToMoveEnd = MainBoard.whiteToMove;
 
         GenerateGrid(startRank, startFile, rank, file);
         DrawPieces();
 
-        soundPlayer.PlayOneShot(MainBoard.clipToPlay);
+        soundPlayer.PlayOneShot(clipToPlay);
 
         rewindButton.interactable = true;
         skipFirstButton.interactable = true;

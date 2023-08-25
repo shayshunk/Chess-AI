@@ -14,8 +14,6 @@ public class Board
     public List<List<int>> allowedMoves;
     public List<int> pieceList, attackedSquares, pinnedPieces, pinnedDirection;
 
-    public AudioClip clipToPlay;
-
     public Board(int ep, int[] squares, bool whiteMove, bool whiteKingCastle, bool whiteQueenCastle, bool blackKingCastle, bool blackQueenCastle)
     {
         whiteIndex = 0;
@@ -262,9 +260,7 @@ public class Board
     }
 
     public void MakeMove(int pieceIndex, int newIndex)
-    {
-        clipToPlay = BoardManager.Instance.regularMove;
-        
+    {   
         int file = newIndex % 8;
         int rank = newIndex / 8;
 
@@ -272,9 +268,7 @@ public class Board
         int startRank = pieceIndex / 8;
 
         int piece = square[pieceIndex];
-
         int pieceListIndex = pieceList.IndexOf(pieceIndex);
-
         int takenPieceIndex = -1;
         
         if (newIndex >= 100)
@@ -285,7 +279,6 @@ public class Board
         if (square[newIndex] != 0)
         {
             takenPieceIndex = newIndex;
-            clipToPlay = BoardManager.Instance.capture;
         }
         
         whiteToMove = !whiteToMove;
@@ -402,12 +395,6 @@ public class Board
         {
             int takenPieceListIndex = pieceList.IndexOf(takenPieceIndex);
 
-            if (takenPieceListIndex == -1)
-            {
-                Debug.Log("Taken piece index was: " + takenPieceIndex);
-                Debug.Log("Square was: " + square[takenPieceIndex]);
-            }
-
             if (Piece.PieceType(square[pieceList[takenPieceListIndex]]) == Piece.Rook)
             {
                 if (pieceList[takenPieceListIndex] == 0)
@@ -436,11 +423,7 @@ public class Board
         }
         
         GenerateAllAttackedSquares();
-
         IsInCheck();
-
-        if (currentPlayerInCheck)
-            clipToPlay = BoardManager.Instance.notify;
 
         GenerateAllowedMoves();
 
