@@ -17,27 +17,29 @@ public static class MoveGenerator
         int pinnedDir = 0;
 
         allowedSquares = new List<int>();
-        attackedSquares = new List<int>();
-        List<int> pinMoveCalc = new List<int>();
 
         int piece = board.square[pieceIndex];
         int pieceType = Piece.PieceType(piece);
         int pieceColor = Piece.Color(piece);
 
-        if (board.pinnedPieces.Contains(pieceIndex))
+        if (board.pinnedPieces.Count != 0)
         {
-            isPinned = true;
-            int pinIndex = board.pinnedPieces.IndexOf(pieceIndex);
-            pinnedDir = board.pinnedDirection[pinIndex];
+            if (board.pinnedPieces.Contains(pieceIndex))
+            {
+                isPinned = true;
+                int pinIndex = board.pinnedPieces.IndexOf(pieceIndex);
+                pinnedDir = board.pinnedDirection[pinIndex];
+            }
         }
 
         if (pieceType == Piece.Pawn)
         {
             allowedSquares = GeneratePseudoLegal.GeneratePawnPseudoLegal(board, pieceIndex, pieceColor);
-            attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
             {
+                List<int> pinMoveCalc = new List<int>();
+
                 pinMoveCalc.Add(pieceIndex + pinnedDir);
                 pinMoveCalc.Add(pieceIndex - pinnedDir);
 
@@ -53,17 +55,17 @@ public static class MoveGenerator
         {
             List<int> tempSquares = new List<int>();
             tempSquares = GeneratePseudoLegal.GenerateKingPseudoLegal(board, pieceIndex, pieceColor);
-            attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
             
             allowedSquares = tempSquares.Except(board.attackedSquares).ToList();
         }
         else if (pieceType == Piece.Bishop)
         {
             allowedSquares = GeneratePseudoLegal.GenerateBishopPseudoLegal(board, pieceIndex, pieceColor);
-            attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
             {
+                List<int> pinMoveCalc = new List<int>();
+
                 bool canMove = true;
 
                 if (pinnedDir == 1 || pinnedDir == 8)
@@ -116,10 +118,11 @@ public static class MoveGenerator
         else if (pieceType == Piece.Rook)
         {
             allowedSquares = GeneratePseudoLegal.GenerateRookPseudoLegal(board, pieceIndex, pieceColor);
-            attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
             {
+                List<int> pinMoveCalc = new List<int>();
+
                 bool canMove = true;
 
                 if (pinnedDir == 7 || pinnedDir == 9)
@@ -172,10 +175,11 @@ public static class MoveGenerator
         else if (pieceType == Piece.Queen)
         {
             allowedSquares = GeneratePseudoLegal.GenerateQueenPseudoLegal(board, pieceIndex, pieceColor);
-            attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
             if (isPinned)
             {
+                List<int> pinMoveCalc = new List<int>();
+
                 int posPinnedDir = pinnedDir;
                 int negPinnedDir = -1 * posPinnedDir;
                 int posIterator = posPinnedDir;
@@ -222,16 +226,49 @@ public static class MoveGenerator
         }
         else if (pieceType == Piece.Knight)
         {
-            allowedSquares = GeneratePseudoLegal.GenerateKnightPseudoLegal(board, pieceIndex, pieceColor);
-            attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
 
-            if (isPinned)
+            if (!isPinned)
             {
-                allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
+                allowedSquares = GeneratePseudoLegal.GenerateKnightPseudoLegal(board, pieceIndex, pieceColor);
             }
         }
 
         return allowedSquares;
+    }
+
+    public static void GenerateAttackedSquares(Board board, int pieceIndex)
+    {
+        attackedSquares = new List<int>();
+
+        int piece = board.square[pieceIndex];
+        int pieceType = Piece.PieceType(piece);
+
+        if (pieceType == Piece.Pawn)
+        {
+            GeneratePseudoLegal.GeneratePawnAttacked(board, pieceIndex);
+        }
+        else if (pieceType == Piece.King)
+        {
+            GeneratePseudoLegal.GenerateKingAttacked(board, pieceIndex);
+        }
+        else if (pieceType == Piece.Bishop)
+        {
+            GeneratePseudoLegal.GenerateBishopAttacked(board, pieceIndex);
+        }
+        else if (pieceType == Piece.Rook)
+        {
+            GeneratePseudoLegal.GenerateRookAttacked(board, pieceIndex);
+        }
+        else if (pieceType == Piece.Queen)
+        {
+            GeneratePseudoLegal.GenerateQueenAttacked(board, pieceIndex);
+        }
+        else
+        {
+            GeneratePseudoLegal.GenerateKnightAttacked(board, pieceIndex);
+        }
+
+        attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
     }
 
     public static List<int> GetAttackedSquares()

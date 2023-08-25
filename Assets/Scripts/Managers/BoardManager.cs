@@ -30,13 +30,6 @@ public class BoardManager : MonoBehaviour
 
     // Game variables
     public bool playerWhite, AIenabled, whiteToMove, currentPlayerInCheck, checkmate;
-    public int[] square;
-    public int[] kingSquares;
-    public List<int> pieceList, attackedSquares, pinnedPieces, pinnedDirection;
-    public List<List<int>> allowedMoves;
-    public bool[] squaresAroundBlackKing;
-    public bool[] squaresAroundWhiteKing;
-
     public int whiteIndex = 0, blackIndex = 1, promotionIndex;
 
     public int plyCount, fiftyMoveCounter, currentBoardHistoryIndex, depthTest;
@@ -45,9 +38,6 @@ public class BoardManager : MonoBehaviour
     Stack<int[]> boardHistory, highlightHistory;
     Stack<bool[]> castleHistory;
     Stack<List<int>> pieceListHistory;
-
-    public bool whiteCastleKingside, whiteCastleQueenside, blackCastleKingside, blackCastleQueenside;
-    public int epFile;
 
     void Awake()
     {
@@ -180,7 +170,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position15);
+        LoadPosition(FenUtility.position2);
     }
 
     public void LoadPosition(string fen)
@@ -241,7 +231,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 3;
+        depthTest = 4;
     }
 
     private void Promotion()

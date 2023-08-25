@@ -28,7 +28,7 @@ public class AIManager : MonoBehaviour
         Chesster chesster = new Chesster();
 
         int[] tempBoard = new int[64];
-        BoardManager.Instance.square.CopyTo(tempBoard, 0);
+        BoardManager.Instance.MainBoard.square.CopyTo(tempBoard, 0);
 
         chesster.BeginThinking(tempBoard);
     }
@@ -48,30 +48,30 @@ public class AIManager : MonoBehaviour
 
         int randomPiece = Random.Range(0 + pieceOffset, 16 + pieceOffset);
 
-        while (BoardManager.Instance.pieceList[randomPiece] == -1)
+        while (BoardManager.Instance.MainBoard.pieceList[randomPiece] == -1)
         {
             randomPiece = Random.Range(0 + pieceOffset, 16 + pieceOffset);
         }
 
-        int noOfMoves = BoardManager.Instance.allowedMoves[randomPiece].Count;
+        int noOfMoves = BoardManager.Instance.MainBoard.allowedMoves[randomPiece].Count;
 
         while (noOfMoves == 0)
         {
             randomPiece = Random.Range(0 + pieceOffset, 16 + pieceOffset);
-            noOfMoves = BoardManager.Instance.allowedMoves[randomPiece].Count;
+            noOfMoves = BoardManager.Instance.MainBoard.allowedMoves[randomPiece].Count;
         }
 
-        Debug.Log("Checking piece at: " + BoardManager.Instance.pieceList[randomPiece]);
+        Debug.Log("Checking piece at: " + BoardManager.Instance.MainBoard.pieceList[randomPiece]);
 
         int randomMove = Random.Range(0, noOfMoves);
 
         Debug.Log("Move will be: " + randomMove);
 
-        piece = BoardManager.Instance.square[BoardManager.Instance.pieceList[randomPiece]];
-        startFile = BoardManager.Instance.pieceList[randomPiece] % 8;
-        startRank = BoardManager.Instance.pieceList[randomPiece] / 8;
-        int file = BoardManager.Instance.allowedMoves[randomPiece][randomMove] % 8;
-        int rank = BoardManager.Instance.allowedMoves[randomPiece][randomMove] / 8;
+        piece = BoardManager.Instance.MainBoard.square[BoardManager.Instance.MainBoard.pieceList[randomPiece]];
+        startFile = BoardManager.Instance.MainBoard.pieceList[randomPiece] % 8;
+        startRank = BoardManager.Instance.MainBoard.pieceList[randomPiece] / 8;
+        int file = BoardManager.Instance.MainBoard.allowedMoves[randomPiece][randomMove] % 8;
+        int rank = BoardManager.Instance.MainBoard.allowedMoves[randomPiece][randomMove] / 8;
 
         newPosition = rank * 8 + file; 
     }

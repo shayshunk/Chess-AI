@@ -23,7 +23,7 @@ public class Chesster
         boardList = new List<int[]>();
         evaluationList = new List<int>();
 
-        allowedMoves = BoardManager.Instance.allowedMoves;
+        allowedMoves = BoardManager.Instance.MainBoard.allowedMoves;
 
         for (int i = indexOffset; i < (16 + indexOffset); i++)
         {

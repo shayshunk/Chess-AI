@@ -95,8 +95,6 @@ public class Board
 
             if (currentPlayerInCheck)
             {
-                //Debug.Log("Current player is in check so let's remove some moves.");
-
                 RemoveIllegalMoves();
             }
 
@@ -122,8 +120,6 @@ public class Board
 
         if (currentPlayerInCheck)
         {
-            //Debug.Log("Current player is in check so let's remove some moves.");
-
             RemoveIllegalMoves();
         }
     }
@@ -138,18 +134,14 @@ public class Board
         for (int i = 0; i < length; i++)
         {
             if (pieceList[i] == -1)
-                    continue;
+                continue;
 
             if (whiteToMove != Piece.IsColor(square[pieceList[i]], Piece.White))
             {   
-                MoveGenerator.GenerateLegal(this, pieceList[i], currentPlayerInCheck);
+                MoveGenerator.GenerateAttackedSquares(this, pieceList[i]);
                 tempAttackedSquares = MoveGenerator.GetAttackedSquares();
 
                 attackedSquares = Enumerable.Union(attackedSquares, tempAttackedSquares).ToList();
-            }
-            else
-            {
-                continue;
             }
         }
     }
@@ -157,6 +149,7 @@ public class Board
     public void RemoveIllegalMoves()
     {
         int[] tempSquare = new int[64];
+        square.CopyTo(tempSquare, 0);
         bool tempCheck = currentPlayerInCheck;
 
         List<List<int>> tempAllowed = new List<List<int>>();
@@ -164,15 +157,13 @@ public class Board
 
         foreach (List<int> moveList in allowedMoves)
         {
-            square.CopyTo(tempSquare, 0);
-            tempMoves = new List<int>();
-
             int pieceListIndex = allowedMoves.IndexOf(moveList);
 
             if (pieceList[pieceListIndex] == -1)
                 continue;
             
             int piece = square[pieceList[pieceListIndex]];
+            int pieceIndex = pieceList[pieceListIndex];
 
             if (whiteToMove != Piece.IsColor(piece, Piece.White))
             {
@@ -199,6 +190,13 @@ public class Board
                 square[pieceList[pieceListIndex]] = 0;
                 int oldKingSquare = kingSquares[kingColor];
 
+                int pieceListOppIndex = pieceList.IndexOf(newIndex);
+                pieceList[pieceListIndex] = newIndex;
+                if (pieceListOppIndex != -1)
+                {
+                    pieceList[pieceListOppIndex] = -1;
+                }
+
                 if (pieceType == Piece.King)
                     kingSquares[kingColor] = move;
 
@@ -212,9 +210,15 @@ public class Board
 
                 tempSquare.CopyTo(square, 0);
                 kingSquares[kingColor] = oldKingSquare;
+                pieceList[pieceListIndex] = pieceIndex;
+                if (pieceListOppIndex != -1)
+                {
+                    pieceList[pieceListOppIndex] = newIndex;
+                }
             }
 
             tempAllowed.Add(tempMoves);
+            tempMoves = new List<int>();
         }
 
         int tempCounter = 0;
