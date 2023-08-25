@@ -417,7 +417,7 @@ public static class GeneratePseudoLegal
             }
             if (board.whiteCastleQueenside && !board.currentPlayerInCheck)
             {
-                bool castleQueenSide = MoveGenerator.IsSquareFree(board, pieceIndex - 1) && MoveGenerator.IsSquareFree(board, pieceIndex - 2);
+                bool castleQueenSide = MoveGenerator.IsSquareFree(board, pieceIndex - 1) && MoveGenerator.IsSquareFree(board, pieceIndex - 2) && MoveGenerator.IsSquareFree(board, pieceIndex - 3);
 
                 if (board.attackedSquares.Contains(pieceIndex - 1) || board.attackedSquares.Contains(pieceIndex - 2))
                     castleQueenSide = false;
@@ -444,7 +444,7 @@ public static class GeneratePseudoLegal
             }
             if (board.blackCastleQueenside && !board.currentPlayerInCheck)
             {
-                bool castleQueenSide = MoveGenerator.IsSquareFree(board, pieceIndex - 1) && MoveGenerator.IsSquareFree(board, pieceIndex - 2);
+                bool castleQueenSide = MoveGenerator.IsSquareFree(board, pieceIndex - 1) && MoveGenerator.IsSquareFree(board, pieceIndex - 2) && MoveGenerator.IsSquareFree(board, pieceIndex - 3);
 
                 if (board.attackedSquares.Contains(pieceIndex - 1) || board.attackedSquares.Contains(pieceIndex - 2))
                     castleQueenSide = false;

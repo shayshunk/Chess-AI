@@ -170,7 +170,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position2);
+        LoadPosition(FenUtility.position4);
     }
 
     public void LoadPosition(string fen)
