@@ -495,7 +495,7 @@ public static class GeneratePseudoLegal
                 break;
             }
         }
-        while (squareUpLeft <= 61)
+        while (squareUpLeft <= 62)
         {
             if (squareUpLeft % 8 == 7)
                 break;
@@ -541,7 +541,7 @@ public static class GeneratePseudoLegal
                 break;
             }
         }
-        while (squareDownLeft >= 1)
+        while (squareDownLeft >= 0)
         {
             if (squareDownLeft % 8 == 7)
                 break;
@@ -803,7 +803,7 @@ public static class GeneratePseudoLegal
                 break;
             }
         }
-        while (squareUpLeft <= 61)
+        while (squareUpLeft <= 62)
         {
             if (squareUpLeft % 8 == 7)
                 break;
@@ -849,7 +849,7 @@ public static class GeneratePseudoLegal
                 break;
             }
         }
-        while (squareDownLeft >= 1)
+        while (squareDownLeft >= 0)
         {
             if (squareDownLeft % 8 == 7)
                 break;
@@ -1056,7 +1056,7 @@ public static class GeneratePseudoLegal
                 break;
             }
         }
-        while (squareUpLeft <= 61)
+        while (squareUpLeft <= 62)
         {
             if (squareUpLeft % 8 == 7)
                 break;
@@ -1092,7 +1092,7 @@ public static class GeneratePseudoLegal
                 break;
             }
         }
-        while (squareDownLeft >= 1)
+        while (squareDownLeft >= 0)
         {
             if (squareDownLeft % 8 == 7)
                 break;
@@ -1296,7 +1296,7 @@ public static class GeneratePseudoLegal
                 break;
             }
         }
-        while (squareUpLeft <= 61)
+        while (squareUpLeft <= 62)
         {
             if (squareUpLeft % 8 == 7)
                 break;
@@ -1332,7 +1332,7 @@ public static class GeneratePseudoLegal
                 break;
             }
         }
-        while (squareDownLeft >= 1)
+        while (squareDownLeft >= 0)
         {
             if (squareDownLeft % 8 == 7)
                 break;

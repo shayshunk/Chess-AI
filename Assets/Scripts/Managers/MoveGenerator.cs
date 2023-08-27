@@ -38,7 +38,6 @@ public static class MoveGenerator
 
             if (isPinned)
             {
-                Debug.Log("Pawn pinned.");
                 List<int> pinMoveCalc = new List<int>();
 
                 pinMoveCalc.Add(pieceIndex + pinnedDir);
