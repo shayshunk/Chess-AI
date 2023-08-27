@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour
@@ -231,7 +232,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 2;
+        depthTest = 4;
     }
 
     private void Promotion()
@@ -688,6 +689,15 @@ public class BoardManager : MonoBehaviour
                 //Board newBoard = new Board(board.epFile, board.square, board.whiteToMove, board.whiteCastleKingside, board.whiteCastleQueenside, board.blackCastleKingside, board.blackCastleQueenside);
 
                 numPositions += MoveGenerationTest(board, depth - 1);
+
+                /*if (depth == 1)
+                {
+                    if (board.square[5] == 14)
+                    {
+                        Debug.Log("We have piece at: " + pieceIndex + " moving to: " + newIndex);
+                        Debug.Log("We have: " + board.pinnedPieces.Count + " pinned pieces.");
+                    }
+                }*/
 
                 board.pieceList = tempPieceList;
                 board.square = tempSquare;

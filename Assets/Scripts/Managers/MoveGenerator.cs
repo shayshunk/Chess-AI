@@ -38,6 +38,7 @@ public static class MoveGenerator
 
             if (isPinned)
             {
+                Debug.Log("Pawn pinned.");
                 List<int> pinMoveCalc = new List<int>();
 
                 pinMoveCalc.Add(pieceIndex + pinnedDir);
@@ -46,6 +47,7 @@ public static class MoveGenerator
                 if (pinnedDir == 8)
                 {
                     pinMoveCalc.Add(pieceIndex + 2 * pinnedDir);
+                    pinMoveCalc.Add(pieceIndex + -2 * pinnedDir);
                 }
 
                 allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
