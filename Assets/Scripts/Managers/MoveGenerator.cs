@@ -7,7 +7,7 @@ using UnityEngine;
 public static class MoveGenerator
 {
     private static bool _inCheck;
-    static List<int> allowedSquares, attackedSquares;
+    static List<int> allowedSquares;
 
     public static List<int> GenerateLegal(Board board, int pieceIndex, bool check)
     {
@@ -55,8 +55,15 @@ public static class MoveGenerator
         {
             List<int> tempSquares = new List<int>();
             tempSquares = GeneratePseudoLegal.GenerateKingPseudoLegal(board, pieceIndex, pieceColor);
-            
-            allowedSquares = tempSquares.Except(board.attackedSquares).ToList();
+
+            for (int i = 0; i < 64; i++)
+            {
+                if (board.attackedSquares[i])
+                    tempSquares.Remove(i);
+            }
+
+            allowedSquares = tempSquares;    
+        
         }
         else if (pieceType == Piece.Bishop)
         {
@@ -236,44 +243,35 @@ public static class MoveGenerator
         return allowedSquares;
     }
 
-    public static void GenerateAttackedSquares(Board board, int pieceIndex)
+    public static void GenerateAttackedSquares(Board board, int pieceIndex, bool[] attacked)
     {
-        attackedSquares = new List<int>();
-
         int piece = board.square[pieceIndex];
         int pieceType = Piece.PieceType(piece);
 
         if (pieceType == Piece.Pawn)
         {
-            GeneratePseudoLegal.GeneratePawnAttacked(board, pieceIndex);
+            GeneratePseudoLegal.GeneratePawnAttacked(board, pieceIndex, attacked);
         }
         else if (pieceType == Piece.King)
         {
-            GeneratePseudoLegal.GenerateKingAttacked(board, pieceIndex);
+            GeneratePseudoLegal.GenerateKingAttacked(board, pieceIndex, attacked);
         }
         else if (pieceType == Piece.Bishop)
         {
-            GeneratePseudoLegal.GenerateBishopAttacked(board, pieceIndex);
+            GeneratePseudoLegal.GenerateBishopAttacked(board, pieceIndex, attacked);
         }
         else if (pieceType == Piece.Rook)
         {
-            GeneratePseudoLegal.GenerateRookAttacked(board, pieceIndex);
+            GeneratePseudoLegal.GenerateRookAttacked(board, pieceIndex, attacked);
         }
         else if (pieceType == Piece.Queen)
         {
-            GeneratePseudoLegal.GenerateQueenAttacked(board, pieceIndex);
+            GeneratePseudoLegal.GenerateQueenAttacked(board, pieceIndex, attacked);
         }
         else
         {
-            GeneratePseudoLegal.GenerateKnightAttacked(board, pieceIndex);
+            GeneratePseudoLegal.GenerateKnightAttacked(board, pieceIndex, attacked);
         }
-
-        attackedSquares = GeneratePseudoLegal.GetAttackedSquares();
-    }
-
-    public static List<int> GetAttackedSquares()
-    {
-        return attackedSquares;
     }
 
     public static bool IsSquareFree(Board board, int squareIndex)

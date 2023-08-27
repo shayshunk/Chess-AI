@@ -12,7 +12,8 @@ public class Board
     public bool currentPlayerInCheck, checkmate;
 
     public List<List<int>> allowedMoves;
-    public List<int> pieceList, attackedSquares, pinnedPieces, pinnedDirection;
+    public List<int> pieceList, pinnedPieces, pinnedDirection;
+    public bool[] attackedSquares;
 
     public Board(int ep, int[] squares, bool whiteMove, bool whiteKingCastle, bool whiteQueenCastle, bool blackKingCastle, bool blackQueenCastle)
     {
@@ -27,7 +28,7 @@ public class Board
         pinnedDirection = new List<int>();
 
         allowedMoves = new List<List<int>>();
-        attackedSquares = new List<int>();
+        attackedSquares = new bool[64];
 
         squares.CopyTo(square, 0);
 
@@ -79,10 +80,7 @@ public class Board
 
         if (allowedMoves.Count == 0)
         {
-            if (attackedSquares.Count == 0)
-            {
-                GenerateAllAttackedSquares();
-            }
+            GenerateAllAttackedSquares();
 
             for (int i = 0; i < length; i++)
             {
@@ -128,8 +126,7 @@ public class Board
     {
         int length = pieceList.Count;
 
-        List<int> tempAttackedSquares = new List<int>();
-        attackedSquares = new List<int>();
+        attackedSquares = new bool[64];
 
         for (int i = 0; i < length; i++)
         {
@@ -138,10 +135,7 @@ public class Board
 
             if (whiteToMove != Piece.IsColor(square[pieceList[i]], Piece.White))
             {   
-                MoveGenerator.GenerateAttackedSquares(this, pieceList[i]);
-                tempAttackedSquares = MoveGenerator.GetAttackedSquares();
-
-                attackedSquares = Enumerable.Union(attackedSquares, tempAttackedSquares).ToList();
+                MoveGenerator.GenerateAttackedSquares(this, pieceList[i], attackedSquares);
             }
         }
     }
@@ -249,14 +243,14 @@ public class Board
     {
         if (whiteToMove)
         {
-            if (attackedSquares.Contains(kingSquares[whiteIndex]))
+            if (attackedSquares[kingSquares[whiteIndex]])
                 currentPlayerInCheck = true;
             else
                 currentPlayerInCheck = false;
         }
         else
         {
-            if (attackedSquares.Contains(kingSquares[blackIndex]))
+            if (attackedSquares[kingSquares[blackIndex]])
                 currentPlayerInCheck = true;
             else
                 currentPlayerInCheck = false;

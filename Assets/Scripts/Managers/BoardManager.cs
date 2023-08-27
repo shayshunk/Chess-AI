@@ -96,7 +96,7 @@ public class BoardManager : MonoBehaviour
                     if (x == file && y == rank)
                         spawnedTile.Check();
                 }
-                /*if (MainBoard.attackedSquares.Contains(y * 8 + x))
+                /*if (MainBoard.attackedSquares[y * 8 + x])
                 {
                     var highlightTile = Instantiate(_tilePrefab, new Vector3(x, y), Quaternion.identity);
                     highlightTile.tag = "Tile";
@@ -170,7 +170,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position6);
+        LoadPosition(FenUtility.position5);
     }
 
     public void LoadPosition(string fen)
@@ -231,7 +231,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 3;
+        depthTest = 2;
     }
 
     private void Promotion()
@@ -331,7 +331,6 @@ public class BoardManager : MonoBehaviour
         
         if (MainBoard.currentPlayerInCheck)
             clipToPlay = notify;
-
 
         whiteToMoveEnd = MainBoard.whiteToMove;
 
