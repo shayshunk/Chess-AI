@@ -182,10 +182,34 @@ public class Board
 
                 square[newIndex] = piece;
                 square[pieceList[pieceListIndex]] = 0;
-                int oldKingSquare = kingSquares[kingColor];
-
                 int pieceListOppIndex = pieceList.IndexOf(newIndex);
                 pieceList[pieceListIndex] = newIndex;
+
+                if (pieceType == Piece.Pawn)
+                {
+                    if (newIndex % 8 == epFile)
+                    {
+                        if (kingColor == 0)
+                        {
+                            if (newIndex / 8 == 5)
+                            {
+                                square[newIndex - 8] = 0;
+                                pieceListOppIndex = pieceList.IndexOf(newIndex - 8);
+                            }
+                        }
+                        else
+                        {
+                            if (newIndex / 8 == 2)
+                            {
+                                square[newIndex + 8] = 0;
+                                pieceListOppIndex = pieceList.IndexOf(newIndex + 8);
+                            }
+                        }
+                    }
+                }
+
+                int oldKingSquare = kingSquares[kingColor];
+
                 if (pieceListOppIndex != -1)
                 {
                     pieceList[pieceListOppIndex] = -1;
@@ -207,7 +231,17 @@ public class Board
                 pieceList[pieceListIndex] = pieceIndex;
                 if (pieceListOppIndex != -1)
                 {
-                    pieceList[pieceListOppIndex] = newIndex;
+                    if (pieceType == Piece.Pawn && newIndex % 8 == epFile)
+                    {
+                        if (newIndex / 8 == 5)
+                            pieceList[pieceListOppIndex] = newIndex - 8;
+                        if (newIndex / 8 == 2)
+                            pieceList[pieceListOppIndex] = newIndex + 8;
+                    }
+                    else
+                    {
+                        pieceList[pieceListOppIndex] = newIndex;
+                    }
                 }
             }
 
@@ -231,14 +265,10 @@ public class Board
 
             for (int j = 0; j < 64; j++)
             {
-                if (allowedMoves.Count != tempAllowed.Count)
-                {
-                    Debug.Log("Somehow allowed moves count is: " + allowedMoves.Count + " and temp allowed count is: " + tempAllowed.Count);
-                }
                 if (allowedMoves[pieceListIndex][j] == true && tempAllowed[pieceListIndex][j] == true)
                     allowedMoves[pieceListIndex][j] = false;
             }
-        }
+        } 
 
         currentPlayerInCheck = tempCheck;
     }
@@ -262,7 +292,7 @@ public class Board
     }
 
     public void MakeMove(int pieceIndex, int newIndex)
-    {   
+    {
         int file = newIndex % 8;
         int rank = newIndex / 8;
 
@@ -343,7 +373,7 @@ public class Board
                     int oldRookIndex = pieceList.IndexOf(7);
                     pieceList[oldRookIndex] = 5;
                 }
-                else if (pieceIndex == 4 &&newIndex == 2 && square[0] == 14)
+                else if (pieceIndex == 4 && newIndex == 2 && square[0] == 14)
                 {
                     square[0] = 0;
                     square[3] = 14;
@@ -415,7 +445,9 @@ public class Board
         square[newIndex] = piece;
 
         if (pieceListIndex != -1)
+        {
             pieceList[pieceListIndex] = newIndex;
+        }
 
         PinHandler.GeneratePins(this);
         pinnedPieces = PinHandler.GetPins();

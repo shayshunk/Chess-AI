@@ -17,7 +17,7 @@ public static class GeneratePseudoLegal
             if (file == board.epFile - 1)
             {
                 if (rank == 4)
-                {                    
+                {                
                     int squareRight = pieceIndex + 1;
                     int pieceRight = board.square[squareRight];
                     int pieceRightType = Piece.PieceType(pieceRight);
