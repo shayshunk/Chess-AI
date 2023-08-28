@@ -82,7 +82,6 @@ public static class GeneratePseudoLegal
                     board.square[pieceIndex] = 0;
                     board.square[squareLeft] = 0;
 
-
                     board.GenerateAllAttackedSquares();
                     board.IsInCheck();
 
@@ -90,7 +89,7 @@ public static class GeneratePseudoLegal
                     {
                         if (pieceLeftType == Piece.Pawn && pieceLeftColor == Piece.Black)
                         {
-                            allowedMoves[pieceIndex + 9] = true;
+                            allowedMoves[pieceIndex + 7] = true;
                         }
                     }
 
@@ -873,19 +872,23 @@ public static class GeneratePseudoLegal
     public static void GeneratePawnAttacked(Board board, int pieceIndex, bool[] attacked)
     {
         int pieceColor = Piece.Color(board.square[pieceIndex]);
-        
-        int rank = pieceIndex / 8;
         int file = pieceIndex % 8;
 
         if (pieceColor == Piece.White)
         {
-            attacked[pieceIndex + 7] = true;
-            attacked[pieceIndex + 9] = true;
+            if (file != 0)
+                attacked[pieceIndex + 7] = true;
+            
+            if (file != 7)
+                attacked[pieceIndex + 9] = true;
 
         } else
         {
-            attacked[pieceIndex - 7] = true;
-            attacked[pieceIndex - 9] = true;
+            if (file != 7)
+                attacked[pieceIndex - 7] = true;
+            
+            if (file != 0)
+                attacked[pieceIndex - 9] = true;
         }
     }
 
