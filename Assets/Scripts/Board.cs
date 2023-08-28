@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using TMPro;
 
 public class Board
 {
@@ -11,7 +12,7 @@ public class Board
     public bool whiteToMove, whiteCastleKingside, whiteCastleQueenside, blackCastleKingside, blackCastleQueenside;
     public bool currentPlayerInCheck, checkmate;
 
-    public List<List<int>> allowedMoves;
+    public List<bool[]> allowedMoves;
     public List<int> pieceList, pinnedPieces, pinnedDirection;
     public bool[] attackedSquares;
 
@@ -27,30 +28,27 @@ public class Board
         pinnedPieces = new List<int>();
         pinnedDirection = new List<int>();
 
-        allowedMoves = new List<List<int>>();
+        allowedMoves = new List<bool[]>();
         attackedSquares = new bool[64];
 
         squares.CopyTo(square, 0);
 
-        int index = 0;
-        foreach (int piece in squares)
+        for (int i = 0; i < 64; i++)
         {
+            int piece = square[i];
             int pieceType = Piece.PieceType(piece);
             int pieceColor = Piece.Color(piece);
 
             if (piece != 0)
             {
-                pieceList.Add(index);
+                pieceList.Add(i);
             }
 
             if (pieceType == Piece.King)
             {
-                int kingColor = pieceColor == Piece.White? whiteIndex: blackIndex;
-
-                kingSquares[kingColor] = index;
+                int kingColor = (pieceColor == Piece.White? whiteIndex: blackIndex);
+                kingSquares[kingColor] = i;
             }
-
-            index++;
         }
 
         whiteToMove = whiteMove;
@@ -86,9 +84,10 @@ public class Board
             {
                 if (pieceList[i] == -1)
                     continue;
-                   
-                List<int> allowedSquares = MoveGenerator.GenerateLegal(this, pieceList[i], currentPlayerInCheck);
-                allowedMoves.Add(allowedSquares.GetRange(0, allowedSquares.Count));
+
+                bool[] allowedSquares = new bool[64];   
+                MoveGenerator.GenerateLegal(this, pieceList[i], currentPlayerInCheck, allowedSquares);
+                allowedMoves.Add(allowedSquares);
             }
 
             if (currentPlayerInCheck)
@@ -112,8 +111,9 @@ public class Board
             if (pieceList[i] == -1)
                 continue;
             
-            List<int> allowedSquares = MoveGenerator.GenerateLegal(this, pieceList[i], currentPlayerInCheck);
-            allowedMoves[i] = allowedSquares.GetRange(0, allowedSquares.Count);
+            bool[] allowedSquares = new bool[64];   
+            MoveGenerator.GenerateLegal(this, pieceList[i], currentPlayerInCheck, allowedSquares);
+            allowedMoves[i] = allowedSquares;
         }
 
         if (currentPlayerInCheck)
@@ -146,39 +146,39 @@ public class Board
         square.CopyTo(tempSquare, 0);
         bool tempCheck = currentPlayerInCheck;
 
-        List<List<int>> tempAllowed = new List<List<int>>();
-        List<int> tempMoves = new List<int>();
+        List<bool[]> tempAllowed = new List<bool[]>();
+        bool[] tempMoves = new bool[64];
 
-        foreach (List<int> moveList in allowedMoves)
+        foreach (bool[] moveList in allowedMoves)
         {
             int pieceListIndex = allowedMoves.IndexOf(moveList);
 
             if (pieceList[pieceListIndex] == -1)
+            {
+                tempAllowed.Add(tempMoves);
+                tempMoves = new bool[64];
                 continue;
+            }
             
             int piece = square[pieceList[pieceListIndex]];
             int pieceIndex = pieceList[pieceListIndex];
 
             if (whiteToMove != Piece.IsColor(piece, Piece.White))
             {
+                tempAllowed.Add(tempMoves);
+                tempMoves = new bool[64];
                 continue;
             }
 
             int pieceType = Piece.PieceType(piece);
             int kingColor = Piece.IsColor(piece, Piece.White)? whiteIndex : blackIndex;
 
-            foreach (int move in moveList)
+            for (int i = 0; i < 64; i++)
             {
-                int newIndex;
-
-                if (move >= 100)
-                {
-                    newIndex = move % 100;
-                }
-                else
-                {
-                    newIndex = move;
-                }
+                if (moveList[i] == false)
+                    continue;
+                
+                int newIndex = i;
 
                 square[newIndex] = piece;
                 square[pieceList[pieceListIndex]] = 0;
@@ -192,14 +192,14 @@ public class Board
                 }
 
                 if (pieceType == Piece.King)
-                    kingSquares[kingColor] = move;
+                    kingSquares[kingColor] = newIndex;
 
                 GenerateAllAttackedSquares();
                 IsInCheck();
 
                 if (currentPlayerInCheck)
                 {
-                    tempMoves.Add(move);
+                    tempMoves[newIndex] = true;
                 }
 
                 tempSquare.CopyTo(square, 0);
@@ -212,10 +212,8 @@ public class Board
             }
 
             tempAllowed.Add(tempMoves);
-            tempMoves = new List<int>();
+            tempMoves = new bool[64];
         }
-
-        int tempCounter = 0;
 
         for (int i = 0; i < allowedMoves.Count; i++)
         {
@@ -231,9 +229,15 @@ public class Board
                 continue;
             }
 
-            allowedMoves[pieceListIndex] = allowedMoves[pieceListIndex].Except(tempAllowed[tempCounter]).ToList();
-
-            tempCounter++;
+            for (int j = 0; j < 64; j++)
+            {
+                if (allowedMoves.Count != tempAllowed.Count)
+                {
+                    Debug.Log("Somehow allowed moves count is: " + allowedMoves.Count + " and temp allowed count is: " + tempAllowed.Count);
+                }
+                if (allowedMoves[pieceListIndex][j] == true && tempAllowed[pieceListIndex][j] == true)
+                    allowedMoves[pieceListIndex][j] = false;
+            }
         }
 
         currentPlayerInCheck = tempCheck;
@@ -431,17 +435,20 @@ public class Board
         {
             checkmate = true;
 
-            foreach (List<int> moveList in allowedMoves)
+            foreach (bool[] moveList in allowedMoves)
             {
                 if (pieceList[allowedMoves.IndexOf(moveList)] == -1)
                     continue;
                 if (whiteToMove != Piece.IsColor(square[pieceList[allowedMoves.IndexOf(moveList)]], Piece.White))
                     continue;
                 
-                if (moveList.Count != 0)
+                for (int i = 0; i < 64; i++)
                 {
-                    checkmate = false;
-                    break;
+                    if (moveList[i] == true)
+                    {
+                        checkmate = false;
+                        break;
+                    }
                 }
             }
         }

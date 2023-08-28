@@ -40,7 +40,7 @@ public class AIManager : MonoBehaviour
 
     private void MakeRandomMove()
     {
-        int pieceOffset = 0;
+        /*int pieceOffset = 0;
         if (_playerWhite)
         {
             pieceOffset = 16;
@@ -73,7 +73,7 @@ public class AIManager : MonoBehaviour
         int file = BoardManager.Instance.MainBoard.allowedMoves[randomPiece][randomMove] % 8;
         int rank = BoardManager.Instance.MainBoard.allowedMoves[randomPiece][randomMove] / 8;
 
-        newPosition = rank * 8 + file; 
+        newPosition = rank * 8 + file; */
     }
     private void Evaluation()
     {

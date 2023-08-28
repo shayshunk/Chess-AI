@@ -7,16 +7,13 @@ using UnityEngine;
 public static class MoveGenerator
 {
     private static bool _inCheck;
-    static List<int> allowedSquares;
 
-    public static List<int> GenerateLegal(Board board, int pieceIndex, bool check)
+    public static void GenerateLegal(Board board, int pieceIndex, bool check, bool[] allowedMoves)
     {
         _inCheck = check;
 
         bool isPinned = false;
         int pinnedDir = 0;
-
-        allowedSquares = new List<int>();
 
         int piece = board.square[pieceIndex];
         int pieceType = Piece.PieceType(piece);
@@ -34,45 +31,49 @@ public static class MoveGenerator
 
         if (pieceType == Piece.Pawn)
         {
-            allowedSquares = GeneratePseudoLegal.GeneratePawnPseudoLegal(board, pieceIndex, pieceColor);
+            GeneratePseudoLegal.GeneratePawnPseudoLegal(board, pieceIndex, pieceColor, allowedMoves);
 
             if (isPinned)
             {
-                List<int> pinMoveCalc = new List<int>();
+                bool[] pinMoveCalc = new bool[64];
 
-                pinMoveCalc.Add(pieceIndex + pinnedDir);
-                pinMoveCalc.Add(pieceIndex - pinnedDir);
-
-                if (pinnedDir == 8)
+                if (pieceColor == Piece.White)
                 {
-                    pinMoveCalc.Add(pieceIndex + 2 * pinnedDir);
-                    pinMoveCalc.Add(pieceIndex + -2 * pinnedDir);
+                    pinMoveCalc[pieceIndex + pinnedDir] = true;
+                    if (pieceIndex / 8 == 1)
+                        pinMoveCalc[pieceIndex + (2 * pinnedDir)] = true;
+                }
+                else
+                {
+                    pinMoveCalc[pieceIndex - pinnedDir] = true;
+                    if (pieceIndex / 8 == 6)
+                        pinMoveCalc[pieceIndex - (2 * pinnedDir)] = true;
                 }
 
-                allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
+                for (int i = 0; i < 64; i++)
+                {
+                    if (!(pinMoveCalc[i] == true && allowedMoves[i] == true))
+                        allowedMoves[i] = false;
+                }
             }
         }
         else if (pieceType == Piece.King)
         {
-            List<int> tempSquares = new List<int>();
-            tempSquares = GeneratePseudoLegal.GenerateKingPseudoLegal(board, pieceIndex, pieceColor);
+            GeneratePseudoLegal.GenerateKingPseudoLegal(board, pieceIndex, pieceColor, allowedMoves);
 
             for (int i = 0; i < 64; i++)
             {
                 if (board.attackedSquares[i])
-                    tempSquares.Remove(i);
-            }
-
-            allowedSquares = tempSquares;    
-        
+                    allowedMoves[i] = false;
+            }   
         }
         else if (pieceType == Piece.Bishop)
         {
-            allowedSquares = GeneratePseudoLegal.GenerateBishopPseudoLegal(board, pieceIndex, pieceColor);
+            GeneratePseudoLegal.GenerateBishopPseudoLegal(board, pieceIndex, pieceColor, allowedMoves);
 
             if (isPinned)
             {
-                List<int> pinMoveCalc = new List<int>();
+                bool[] pinMoveCalc = new bool[64];
 
                 bool canMove = true;
 
@@ -88,11 +89,11 @@ public static class MoveGenerator
 
                 while (posSquare <= 63 && canMove)
                 {
-                    pinMoveCalc.Add(posSquare);
+                    pinMoveCalc[posSquare] = true;
 
                     if (IsEnemySquare(board, posSquare, pieceColor))
                     {
-                        pinMoveCalc.Add(posSquare);
+                        pinMoveCalc[posSquare] = true;
                         break;
                     }
                     else if (!IsSquareFree(board, posSquare))
@@ -105,11 +106,11 @@ public static class MoveGenerator
 
                 while (negSquare >= 0 && canMove)
                 {
-                    pinMoveCalc.Add(negSquare);
+                    pinMoveCalc[negSquare] = true;
 
                     if (IsEnemySquare(board, negSquare, pieceColor))
                     {
-                        pinMoveCalc.Add(negSquare);
+                        pinMoveCalc[negSquare] = true;
                         break;
                     }
                     else if (!IsSquareFree(board, negSquare))
@@ -120,16 +121,20 @@ public static class MoveGenerator
                     negSquare -= posIterator;
                 }
 
-                allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
+                for (int i = 0; i < 64; i++)
+                {
+                    if (!(pinMoveCalc[i] == true && allowedMoves[i] == true))
+                        allowedMoves[i] = false;
+                }
             }
         }
         else if (pieceType == Piece.Rook)
         {
-            allowedSquares = GeneratePseudoLegal.GenerateRookPseudoLegal(board, pieceIndex, pieceColor);
+            GeneratePseudoLegal.GenerateRookPseudoLegal(board, pieceIndex, pieceColor, allowedMoves);
 
             if (isPinned)
             {
-                List<int> pinMoveCalc = new List<int>();
+                bool[] pinMoveCalc = new bool[64];
 
                 bool canMove = true;
 
@@ -145,11 +150,11 @@ public static class MoveGenerator
 
                 while (posSquare <= 63 && canMove)
                 {
-                    pinMoveCalc.Add(posSquare);
+                    pinMoveCalc[posSquare] = true;
 
                     if (IsEnemySquare(board, posSquare, pieceColor))
                     {
-                        pinMoveCalc.Add(posSquare);
+                        pinMoveCalc[posSquare] = true;
                         break;
                     }
                     else if (!IsSquareFree(board, posSquare))
@@ -162,11 +167,11 @@ public static class MoveGenerator
 
                 while (negSquare >= 0 && canMove)
                 {
-                    pinMoveCalc.Add(negSquare);
+                    pinMoveCalc[negSquare] = true;
 
                     if (IsEnemySquare(board, negSquare, pieceColor))
                     {
-                        pinMoveCalc.Add(negSquare);
+                        pinMoveCalc[negSquare] = true;
                         break;
                     }
                     else if (!IsSquareFree(board, negSquare))
@@ -177,16 +182,20 @@ public static class MoveGenerator
                     negSquare -= posIterator;
                 }
 
-                allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
+                for (int i = 0; i < 64; i++)
+                {
+                    if (!(pinMoveCalc[i] == true && allowedMoves[i] == true))
+                        allowedMoves[i] = false;
+                }
             }
         }
         else if (pieceType == Piece.Queen)
         {
-            allowedSquares = GeneratePseudoLegal.GenerateQueenPseudoLegal(board, pieceIndex, pieceColor);
+            GeneratePseudoLegal.GenerateQueenPseudoLegal(board, pieceIndex, pieceColor, allowedMoves);
 
             if (isPinned)
             {
-                List<int> pinMoveCalc = new List<int>();
+                bool[] pinMoveCalc = new bool[64];
 
                 int posPinnedDir = pinnedDir;
                 int negPinnedDir = -1 * posPinnedDir;
@@ -197,11 +206,11 @@ public static class MoveGenerator
 
                 while (posSquare <= 63)
                 {
-                    pinMoveCalc.Add(posSquare);
+                    pinMoveCalc[posSquare] = true;
 
                     if (IsEnemySquare(board, posSquare, pieceColor))
                     {
-                        pinMoveCalc.Add(posSquare);
+                        pinMoveCalc[posSquare] = true;
                         break;
                     }
                     else if (!IsSquareFree(board, posSquare))
@@ -214,11 +223,11 @@ public static class MoveGenerator
 
                 while (negSquare >= 0)
                 {
-                    pinMoveCalc.Add(negSquare);
+                    pinMoveCalc[negSquare] = true;
 
                     if (IsEnemySquare(board, negSquare, pieceColor))
                     {
-                        pinMoveCalc.Add(negSquare);
+                        pinMoveCalc[negSquare] = true;
                         break;
                     }
                     else if (!IsSquareFree(board, negSquare))
@@ -228,20 +237,21 @@ public static class MoveGenerator
                     
                     negSquare -= posIterator;
                 }
-
-                allowedSquares = Enumerable.Intersect(allowedSquares, pinMoveCalc).ToList();
+                
+                for (int i = 0; i < 64; i++)
+                {
+                    if (!(pinMoveCalc[i] == true && allowedMoves[i] == true))
+                        allowedMoves[i] = false;
+                }
             }
         }
         else if (pieceType == Piece.Knight)
         {
-
             if (!isPinned)
             {
-                allowedSquares = GeneratePseudoLegal.GenerateKnightPseudoLegal(board, pieceIndex, pieceColor);
+                GeneratePseudoLegal.GenerateKnightPseudoLegal(board, pieceIndex, pieceColor, allowedMoves);
             }
         }
-
-        return allowedSquares;
     }
 
     public static void GenerateAttackedSquares(Board board, int pieceIndex, bool[] attacked)

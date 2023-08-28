@@ -54,20 +54,14 @@ public class DragDrop : MonoBehaviour
 
             int pieceListIndex = BoardManager.Instance.MainBoard.pieceList.IndexOf(pieceIndex);
 
-            List<int> allowedSquares = BoardManager.Instance.MainBoard.allowedMoves[pieceListIndex];
+            bool[] allowedSquares = BoardManager.Instance.MainBoard.allowedMoves[pieceListIndex];
 
-            foreach (int index in allowedSquares)
+            for (int i = 0; i < 64; i++)
             {
-                int newIndex;
+                int newIndex = i;
 
-                if (index >= 100)
-                {
-                    newIndex = index % 100;
-                }
-                else
-                {
-                    newIndex = index;
-                }
+                if (!allowedSquares[newIndex])
+                    continue;
 
                 int newRank = newIndex / 8;
                 int newFile = newIndex % 8;

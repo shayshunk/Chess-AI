@@ -171,7 +171,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position5);
+        LoadPosition(FenUtility.startFen);
     }
 
     public void LoadPosition(string fen)
@@ -232,7 +232,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 4;
+        depthTest = 5;
     }
 
     private void Promotion()
@@ -297,21 +297,16 @@ public class BoardManager : MonoBehaviour
             clipToPlay = capture;
         }
 
-        if (pieceType == Piece.Pawn && (rank == 0 || rank == 7))
-        {
-            newIndex = newIndex + 100;
-        }
-
         int pieceListIndex = MainBoard.pieceList.IndexOf(pieceIndex);
 
-        if (MainBoard.allowedMoves[pieceListIndex].Count == 0)
+        
+        if (newIndex > 63 || newIndex < 0)
         {
             GenerateGrid();
             DrawPieces();
             yield return null;
         }
-
-        if (!MainBoard.allowedMoves[pieceListIndex].Contains(newIndex))
+        if (MainBoard.allowedMoves[pieceListIndex][newIndex] == false)
         {
             GenerateGrid();
             DrawPieces();
@@ -325,7 +320,6 @@ public class BoardManager : MonoBehaviour
             {
                 yield return new WaitForSeconds(0.2f);
             }
-            newIndex = newIndex % 100;
         }
 
         MainBoard.MakeMove(pieceIndex, newIndex);
@@ -623,10 +617,10 @@ public class BoardManager : MonoBehaviour
         
         int numPositions = 0;
 
-        List<List<int>> allowedMoves = new List<List<int>>(board.allowedMoves.Select(x => x.ToList()));
+        List<bool[]> allowedMoves = new List<bool[]>(board.allowedMoves.Select(x => (bool[])x.Clone()));
         List<int> pieceList = new List<int>(board.pieceList);
 
-        foreach (List<int> moveList in allowedMoves)
+        foreach (bool[] moveList in allowedMoves)
         {
             int pieceListIndex = allowedMoves.IndexOf(moveList);
             int pieceIndex = board.pieceList[pieceListIndex];
@@ -639,8 +633,15 @@ public class BoardManager : MonoBehaviour
             if (Piece.IsColor(piece, Piece.White) != board.whiteToMove)
                 continue;
 
-            foreach (int move in moveList)
+            int promotion = 0;
+
+            for (int i = 0; i < 64; i++)
             {
+                if (!moveList[i])
+                    continue;
+                if (promotion >= 4)
+                    continue;
+                
                 List<int> tempPieceList = new List<int>(board.pieceList);
                 int[] tempSquare = new int[64];
                 int[] tempKing = new int[2];
@@ -653,12 +654,12 @@ public class BoardManager : MonoBehaviour
                 board.square.CopyTo(tempSquare, 0);
                 board.kingSquares.CopyTo(tempKing, 0);
 
-                int newIndex;
+                int newIndex = i;
 
-                if (move >= 100)
+                if (pieceType == Piece.Pawn && (newIndex / 8 == 7 || newIndex / 8 == 0))
                 {
-                    newIndex = move % 100;
-                    int promotion = move / 100;
+                    i--;
+                    promotion++;
 
                     switch (promotion)
                     {
@@ -678,10 +679,6 @@ public class BoardManager : MonoBehaviour
                             promotionIndex = 0;
                             break;
                     }    
-                }
-                else
-                {
-                    newIndex = move;
                 }
 
                 PseudoMakeMove(board, pieceIndex, newIndex);

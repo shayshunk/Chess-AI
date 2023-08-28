@@ -7,7 +7,7 @@ public class Chesster
     private bool _playerWhite;
     List<int[]> boardList;
     List<int> evaluationList;
-    List<List<int>> allowedMoves;
+    List<bool[]> allowedMoves;
 
     void Start()
     {
@@ -27,12 +27,12 @@ public class Chesster
 
         for (int i = indexOffset; i < (16 + indexOffset); i++)
         {
-            int length = allowedMoves[i].Count;
+            /*int length = allowedMoves[i].Count;
 
             for (int j = 0; j < length; j++)
             {
                 
-            }
+            }*/
         }
     }
 }
