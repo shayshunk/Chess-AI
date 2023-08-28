@@ -171,7 +171,7 @@ public class BoardManager : MonoBehaviour
         skipFirstButton.interactable = false;
         skipLastButton.interactable = false;
 
-        LoadPosition(FenUtility.position2);
+        LoadPosition(FenUtility.position3);
     }
 
     public void LoadPosition(string fen)
@@ -232,7 +232,7 @@ public class BoardManager : MonoBehaviour
         plyCount = 0;
         fiftyMoveCounter = 0;
         promotionIndex = 100;
-        depthTest = 2;
+        depthTest = 5;
     }
 
     private void Promotion()
@@ -640,7 +640,10 @@ public class BoardManager : MonoBehaviour
                 if (!moveList[i])
                     continue;
                 if (promotion >= 4)
+                {
+                    promotion = 0;
                     continue;
+                }
                 
                 List<int> tempPieceList = new List<int>(board.pieceList);
                 int[] tempSquare = new int[64];
@@ -678,23 +681,12 @@ public class BoardManager : MonoBehaviour
                         default:
                             promotionIndex = 0;
                             break;
-                    }    
+                    }
                 }
 
                 PseudoMakeMove(board, pieceIndex, newIndex);
 
-                //Board newBoard = new Board(board.epFile, board.square, board.whiteToMove, board.whiteCastleKingside, board.whiteCastleQueenside, board.blackCastleKingside, board.blackCastleQueenside);
-
                 numPositions += MoveGenerationTest(board, depth - 1);
-
-                /*if (depth == 1)
-                {
-                    if (board.square[5] == 14)
-                    {
-                        Debug.Log("We have piece at: " + pieceIndex + " moving to: " + newIndex);
-                        Debug.Log("We have: " + board.pinnedPieces.Count + " pinned pieces.");
-                    }
-                }*/
 
                 board.pieceList = tempPieceList;
                 board.square = tempSquare;
